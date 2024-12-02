@@ -191,6 +191,18 @@ fun SignInScreenThemedPreview() {
                 TODO("Not yet implemented")
             }
 
+            override suspend fun getUserInfo(userId: Int): User {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun changePassword(
+                userId: Int,
+                currentPassword: String,
+                newPassword: String
+            ): Int {
+                TODO("Not yet implemented")
+            }
+
         }
         SignUpScreen({}, viewModel = SignUpViewModel(UserRepository(userDao)), navigateToProfile = {})
     }
