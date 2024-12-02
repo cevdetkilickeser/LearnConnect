@@ -6,7 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.cevdetkilickeser.learnconnect.ui.presentation.SignInScreen
+import com.cevdetkilickeser.learnconnect.ui.presentation.signin.SignInScreen
 
 @Composable
 fun AppNavigation(

@@ -1,4 +1,4 @@
-package com.cevdetkilickeser.learnconnect.ui.presentation
+package com.cevdetkilickeser.learnconnect.ui.presentation.signup
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,19 +10,19 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SignInViewModel @Inject constructor(private val userRepository: UserRepository) : ViewModel() {
+class SignUpViewModel @Inject constructor(private val userRepository: UserRepository) : ViewModel() {
 
     private val _userId = MutableStateFlow(-1)
     val userId: StateFlow<Int> = _userId
 
-    private val _isSignInSuccessful = MutableStateFlow(false)
-    val isSignInSuccessful: StateFlow<Boolean> = _isSignInSuccessful
+    private val _isSignUpSuccessful = MutableStateFlow(false)
+    val isSignUpSuccessful: StateFlow<Boolean> = _isSignUpSuccessful
 
-    fun signIn(email: String, password: String) {
+    fun signUp(email: String, password: String) {
         viewModelScope.launch {
-            val userId = userRepository.signIn(email, password)
+            val userId = userRepository.signUp(email, password)
             _userId.value = userId
-            _isSignInSuccessful.value = userId > 0
+            _isSignUpSuccessful.value = userId > 0
         }
     }
 }

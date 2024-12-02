@@ -1,7 +1,6 @@
-package com.cevdetkilickeser.learnconnect.ui.presentation
+package com.cevdetkilickeser.learnconnect.ui.presentation.signup
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,27 +39,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cevdetkilickeser.learnconnect.R
+import com.cevdetkilickeser.learnconnect.data.entity.User
 import com.cevdetkilickeser.learnconnect.data.repository.UserRepository
 import com.cevdetkilickeser.learnconnect.data.room.UserDao
 import com.cevdetkilickeser.learnconnect.ui.theme.LearnConnectTheme
 
 @Composable
-fun SignInScreen(
-    viewModel: SignInViewModel = hiltViewModel(),
+fun SignUpScreen(
     saveUserIdToShared: (Int) -> Unit,
-    navigateToHome: () -> Unit,
-    navigateToSignUp: () -> Unit
+    viewModel: SignUpViewModel = hiltViewModel(),
+    navigateToProfile: () -> Unit
 ) {
     val userId by viewModel.userId.collectAsState()
-    val isSignInSuccessful by viewModel.isSignInSuccessful.collectAsState()
+    val isSignUpSuccessful by viewModel.isSignUpSuccessful.collectAsState()
 
-    LaunchedEffect(isSignInSuccessful) {
-        if (isSignInSuccessful) {
+    LaunchedEffect(isSignUpSuccessful) {
+        if (isSignUpSuccessful) {
             saveUserIdToShared(userId)
-            navigateToHome()
+            navigateToProfile()
         }
     }
 
@@ -160,9 +158,8 @@ fun SignInScreen(
                         )
                     }
                 )
-
                 Button(
-                    onClick = { viewModel.signIn(email, password) },
+                    onClick = { viewModel.signUp(email, password) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = email.isNotBlank() && password.isNotBlank(),
                     colors = ButtonDefaults.buttonColors(
@@ -170,23 +167,8 @@ fun SignInScreen(
                         contentColor = Color.White
                     )
                 ) {
-                    Text(text = stringResource(id = R.string.sign_in))
+                    Text(text = stringResource(id = R.string.sign_up))
                 }
-
-                Text(
-                    text = stringResource(id = R.string.dont_have_account),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Text(
-                    text = stringResource(id = R.string.sign_up),
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.clickable { navigateToSignUp() }
-                )
-                Text(
-                    text = stringResource(id = R.string.thanks),
-                    fontSize = 10.sp
-                )
             }
         }
     }
@@ -195,17 +177,21 @@ fun SignInScreen(
 @Preview(showBackground = true)
 @Composable
 fun SignInScreenThemedPreview() {
-    LearnConnectTheme {
+    LearnConnectTheme(false) {
         val userDao = object : UserDao {
             override suspend fun isUserExists(email: String, password: String): Int? {
                 TODO("Not yet implemented")
             }
+
+            override suspend fun isEmailExists(email: String): Boolean {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun addUser(user: User): Long {
+                TODO("Not yet implemented")
+            }
+
         }
-        SignInScreen(
-            saveUserIdToShared = {},
-            navigateToHome = {},
-            navigateToSignUp = {},
-            viewModel = SignInViewModel(UserRepository(userDao))
-        )
+        SignUpScreen({}, viewModel = SignUpViewModel(UserRepository(userDao)), navigateToProfile = {})
     }
 }
