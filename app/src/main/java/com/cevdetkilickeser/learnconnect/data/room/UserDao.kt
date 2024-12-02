@@ -14,4 +14,14 @@ interface UserDao {
 
     @Insert
     suspend fun addUser(user: User): Long
+
+    @Query("SELECT * FROM users WHERE id = :userId")
+    suspend fun getUserInfo(userId: Int): User
+
+    @Query("""
+    UPDATE users 
+    SET password = :newPassword 
+    WHERE id = :userId AND password = :currentPassword
+""")
+    suspend fun changePassword(userId: Int, currentPassword: String, newPassword: String): Int
 }

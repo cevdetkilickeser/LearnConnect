@@ -25,4 +25,16 @@ class UserRepository @Inject constructor(private val userDao: UserDao) {
             }
         }
     }
+
+    suspend fun getUserInfo(userId: Int): User {
+        return withContext(Dispatchers.IO) {
+            userDao.getUserInfo(userId)
+        }
+    }
+
+    suspend fun changePassword(userId: Int, currentPassword: String, newPassword: String): Int {
+        return withContext(Dispatchers.IO) {
+            userDao.changePassword(userId, currentPassword, newPassword)
+        }
+    }
 }
