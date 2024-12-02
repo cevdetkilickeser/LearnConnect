@@ -25,4 +25,9 @@ object DatabaseModule {
             .createFromAsset("prepopulated_database.db")
             .build()
     }
+
+    @Provides
+    @Singleton
+    fun provideUserDao(database: AppDatabase) = database.userDao()
+
 }
