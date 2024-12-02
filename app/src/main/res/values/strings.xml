@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">LearnConnect</string>
+    <string name="slogan">Learn Anything, Anywhere…</string>
+    <string name="app_logo">App Logo</string>
+    <string name="email">E-mail</string>
+    <string name="password">Password</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="dont_have_account">Don\'t have an account?</string>
+    <string name="thanks">Thanks to Harum Shidiqi for UI kit</string>
 </resources>
