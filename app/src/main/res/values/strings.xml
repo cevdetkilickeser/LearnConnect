@@ -11,4 +11,10 @@
     <string name="thanks">Thanks to Harum Shidiqi for UI kit</string>
     <string name="password_changed">"Password changed successfully"</string>
     <string name="password_not_changed">"Current password incorrect"</string>
+    <string name="description">Description</string>
+    <string name="author">Author</string>
+    <string name="enroll">Enroll</string>
+    <string name="watch">Watch</string>
+    <string name="comments">Comments</string>
+    <string name="lesson">Lesson</string>
 </resources>

@@ -6,6 +6,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.cevdetkilickeser.learnconnect.ui.presentation.coursedetail.CourseDetailScreen
+import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeScreen
 import com.cevdetkilickeser.learnconnect.ui.presentation.profile.ProfileScreen
 import com.cevdetkilickeser.learnconnect.ui.presentation.signin.SignInScreen
 
@@ -63,6 +65,24 @@ fun AppNavigation(
                             inclusive = true
                         }
                     }
+                }
+            )
+        }
+        composable(Screen.Home.route) {
+            HomeScreen(
+                navigateToCourseDetail = { courseId ->
+                    navController.navigate(Screen.CourseDetail.withArgs(courseId))
+                }
+            )
+        }
+        composable(Screen.CourseDetail.route) { backStackEntry ->
+            val courseId = backStackEntry.arguments?.getString("courseId") ?: "0"
+            val userId = getUserIdFromSharedPref()
+            CourseDetailScreen(
+                courseId = courseId.toInt(),
+                userId = userId,
+                navigateToWatchCourse = {
+                    navController.navigate(Screen.WatchCourse.withArgs(courseId))
                 }
             )
         }
