@@ -75,7 +75,7 @@ fun ProfileScreen(
 
     LaunchedEffect(Unit) {
         viewModel.passwordChanged.collect { result ->
-            val message = if (result) successMessage else errorMessage
+            val message = if (result) errorMessage else successMessage
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
     }

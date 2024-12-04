@@ -230,6 +230,14 @@ fun CourseDetailPreview() {
             override suspend fun getCourseById(id: Int): Course {
                 TODO("Not yet implemented")
             }
+
+            override suspend fun getCoursesDone(userId: Int): List<Course> {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun getCoursesInProgress(userId: Int): List<Course> {
+                TODO("Not yet implemented")
+            }
         }
         val enrollmentDao = object : EnrollmentDao {
             override suspend fun checkEnrollmentStatus(userId: Int, courseId: Int): Boolean {

@@ -1,6 +1,7 @@
 package com.cevdetkilickeser.learnconnect.ui.presentation.signup
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,7 +51,8 @@ import com.cevdetkilickeser.learnconnect.ui.theme.LearnConnectTheme
 fun SignUpScreen(
     saveUserIdToShared: (Int) -> Unit,
     viewModel: SignUpViewModel = hiltViewModel(),
-    navigateToProfile: () -> Unit
+    navigateToProfile: () -> Unit,
+    navigateToSignIn: () -> Unit
 ) {
     val userId by viewModel.userId.collectAsState()
     val isSignUpSuccessful by viewModel.isSignUpSuccessful.collectAsState()
@@ -169,6 +171,16 @@ fun SignUpScreen(
                 ) {
                     Text(text = stringResource(id = R.string.sign_up))
                 }
+                Text(
+                    text = stringResource(id = R.string.already_have_account),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Text(
+                    text = stringResource(id = R.string.sign_up),
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable { navigateToSignIn() }
+                )
             }
         }
     }
@@ -204,6 +216,11 @@ fun SignInScreenThemedPreview() {
             }
 
         }
-        SignUpScreen({}, viewModel = SignUpViewModel(UserRepository(userDao)), navigateToProfile = {})
+        SignUpScreen(
+            {},
+            viewModel = SignUpViewModel(UserRepository(userDao)),
+            navigateToProfile = {},
+            navigateToSignIn = {}
+        )
     }
 }

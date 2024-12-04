@@ -44,4 +44,16 @@ class CourseRepository @Inject constructor(private val courseDao: CourseDao) {
             courseDao.getCourseById(id)
         }
     }
+
+    suspend fun getEnrolledCoursesDone(userId: Int): List<Course> {
+        return withContext(Dispatchers.IO) {
+            courseDao.getCoursesDone(userId)
+        }
+    }
+
+    suspend fun getEnrolledCoursesInProgress(userId: Int): List<Course> {
+        return withContext(Dispatchers.IO) {
+            courseDao.getCoursesInProgress(userId)
+        }
+    }
 }

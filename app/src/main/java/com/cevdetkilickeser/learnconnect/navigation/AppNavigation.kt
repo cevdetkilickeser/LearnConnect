@@ -8,8 +8,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.cevdetkilickeser.learnconnect.ui.presentation.coursedetail.CourseDetailScreen
 import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeScreen
+import com.cevdetkilickeser.learnconnect.ui.presentation.mycourses.MyCoursesScreen
 import com.cevdetkilickeser.learnconnect.ui.presentation.profile.ProfileScreen
 import com.cevdetkilickeser.learnconnect.ui.presentation.signin.SignInScreen
+import com.cevdetkilickeser.learnconnect.ui.presentation.signup.SignUpScreen
 
 @Composable
 fun AppNavigation(
@@ -53,12 +55,18 @@ fun AppNavigation(
                 navigateToSignUp = { navController.navigate(Screen.SignUp.route) }
             )
         }
-        composable(Screen.Profile.route) {
-            ProfileScreen(
-                isDarkTheme = isDarkTheme,
-                changeAppTheme = changeAppTheme,
-                userId = getUserIdFromSharedPref(),
-                removeUserIdFromSharedPref = { removeUserIdFromSharedPref() },
+        composable(Screen.SignUp.route) {
+            SignUpScreen(
+                saveUserIdToShared = { userId ->
+                    saveUserIdToSharedPref(userId)
+                },
+                navigateToProfile = {
+                    navController.navigate(Screen.Profile.route) {
+                        popUpTo(0) {
+                            inclusive = true
+                        }
+                    }
+                },
                 navigateToSignIn = {
                     navController.navigate(Screen.SignIn.route) {
                         popUpTo(0) {
@@ -72,6 +80,29 @@ fun AppNavigation(
             HomeScreen(
                 navigateToCourseDetail = { courseId ->
                     navController.navigate(Screen.CourseDetail.withArgs(courseId))
+                }
+            )
+        }
+        composable(Screen.MyCourses.route) {
+            MyCoursesScreen(
+                userId = getUserIdFromSharedPref(),
+                navigateToWatchCourse = { courseId ->
+                    navController.navigate(Screen.WatchCourse.withArgs(courseId.toString()))
+                }
+            )
+        }
+        composable(Screen.Profile.route) {
+            ProfileScreen(
+                isDarkTheme = isDarkTheme,
+                changeAppTheme = changeAppTheme,
+                userId = getUserIdFromSharedPref(),
+                removeUserIdFromSharedPref = { removeUserIdFromSharedPref() },
+                navigateToSignIn = {
+                    navController.navigate(Screen.SignIn.route) {
+                        popUpTo(0) {
+                            inclusive = true
+                        }
+                    }
                 }
             )
         }
