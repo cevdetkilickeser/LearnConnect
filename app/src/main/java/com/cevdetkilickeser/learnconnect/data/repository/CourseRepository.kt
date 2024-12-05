@@ -1,5 +1,6 @@
 package com.cevdetkilickeser.learnconnect.data.repository
 
+import com.cevdetkilickeser.learnconnect.data.entity.course.Comment
 import com.cevdetkilickeser.learnconnect.data.entity.course.Course
 import com.cevdetkilickeser.learnconnect.data.room.CourseDao
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +43,18 @@ class CourseRepository @Inject constructor(private val courseDao: CourseDao) {
     suspend fun getCourseById(id: Int): Course {
         return withContext(Dispatchers.IO) {
             courseDao.getCourseById(id)
+        }
+    }
+
+    suspend fun getComments(courseId: Int): List<Comment> {
+        return withContext(Dispatchers.IO) {
+            courseDao.getComments(courseId)
+        }
+    }
+
+    suspend fun addComment(comment: Comment) {
+        withContext(Dispatchers.IO) {
+            courseDao.addComment(comment)
         }
     }
 

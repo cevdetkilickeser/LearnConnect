@@ -12,7 +12,7 @@ import com.cevdetkilickeser.learnconnect.data.entity.User
     foreignKeys = [
         ForeignKey(
             entity = User::class,
-            parentColumns = ["id"],
+            parentColumns = ["userId"],
             childColumns = ["userId"],
             onDelete = ForeignKey.CASCADE
         )

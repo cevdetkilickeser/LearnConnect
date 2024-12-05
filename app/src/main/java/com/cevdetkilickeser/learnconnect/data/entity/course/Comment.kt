@@ -1,5 +1,6 @@
 package com.cevdetkilickeser.learnconnect.data.entity.course
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -7,26 +8,22 @@ import androidx.room.PrimaryKey
 import com.cevdetkilickeser.learnconnect.data.entity.User
 
 @Entity(
-    tableName = "enrollments",
+    tableName = "comments",
     foreignKeys = [
         ForeignKey(
             entity = Course::class,
             parentColumns = ["courseId"],
             childColumns = ["courseId"],
             onDelete = ForeignKey.CASCADE
-        ),
-        ForeignKey(
-            entity = User::class,
-            parentColumns = ["userId"],
-            childColumns = ["userId"],
-            onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index(value = ["userId", "courseId"], unique = true)]
+    indices = [Index("courseId")]
 )
-data class Enrollment(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val userId: Int,
-    val courseId: Int
+data class Comment(
+    @PrimaryKey(autoGenerate = true) val commentId: Int = 0,
+    val courseId: Int,
+    @Embedded val user: User,
+    val commentDate: String,
+    val comment: String,
+    val rate: Int
 )
-

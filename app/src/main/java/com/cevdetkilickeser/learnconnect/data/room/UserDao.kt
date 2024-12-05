@@ -8,7 +8,7 @@ import com.cevdetkilickeser.learnconnect.data.entity.User
 @Dao
 interface UserDao {
 
-    @Query("SELECT id FROM users WHERE email = :email AND password = :password")
+    @Query("SELECT userId FROM users WHERE email = :email AND password = :password")
     suspend fun isUserExists(email: String, password: String): Int?
 
     @Query("SELECT COUNT(*) FROM users WHERE email = :email")
@@ -17,13 +17,15 @@ interface UserDao {
     @Insert
     suspend fun addUser(user: User): Long
 
-    @Query("SELECT * FROM users WHERE id = :userId")
+    @Query("SELECT * FROM users WHERE userId = :userId")
     suspend fun getUserInfo(userId: Int): User
 
-    @Query("""
+    @Query(
+        """
     UPDATE users 
     SET password = :newPassword 
-    WHERE id = :userId AND password = :currentPassword
-""")
+    WHERE userId = :userId AND password = :currentPassword
+"""
+    )
     suspend fun changePassword(userId: Int, currentPassword: String, newPassword: String): Int
 }

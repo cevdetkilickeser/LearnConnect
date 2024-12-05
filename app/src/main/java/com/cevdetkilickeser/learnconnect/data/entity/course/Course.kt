@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "courses")
 data class Course(
-    @PrimaryKey val id: Int,
+    @PrimaryKey val courseId: Int,
     val courseName: String,
     val author: String,
     val category: String

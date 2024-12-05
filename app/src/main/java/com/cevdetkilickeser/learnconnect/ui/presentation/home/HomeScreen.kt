@@ -45,6 +45,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cevdetkilickeser.learnconnect.R
 import com.cevdetkilickeser.learnconnect.data.entity.course.Course
+import com.cevdetkilickeser.learnconnect.data.entity.course.Enrollment
+import com.cevdetkilickeser.learnconnect.data.entity.course.LessonStatus
 import com.cevdetkilickeser.learnconnect.data.repository.CourseRepository
 import com.cevdetkilickeser.learnconnect.data.room.CourseDao
 import com.cevdetkilickeser.learnconnect.ui.theme.LearnConnectTheme
@@ -184,7 +186,7 @@ fun CourseItem(
     navigateToCourseDetail: (String) -> Unit
 ) {
     Card(
-        onClick = { navigateToCourseDetail(course.id.toString()) },
+        onClick = { navigateToCourseDetail(course.courseId.toString()) },
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
@@ -243,6 +245,26 @@ fun HomePreview() {
             }
 
             override suspend fun getCoursesInProgress(userId: Int): List<Course> {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun checkEnrollmentStatus(userId: Int, courseId: Int): Boolean {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun enrollToCourse(enrollment: Enrollment): Long {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun unEnroll(userId: Int, courseId: Int) {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun fillLessonStatusTable(lessonStatus: LessonStatus) {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun cleanLessonStatusTable(userId: Int, courseId: Int) {
                 TODO("Not yet implemented")
             }
         }

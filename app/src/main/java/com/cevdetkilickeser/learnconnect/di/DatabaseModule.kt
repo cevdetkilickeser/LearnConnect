@@ -38,8 +38,4 @@ object DatabaseModule {
     @Singleton
     fun provideLessonDao(database: AppDatabase) = database.lessonDao()
 
-    @Provides
-    @Singleton
-    fun provideEnrollmentDao(database: AppDatabase) = database.enrollmentDao()
-
 }
