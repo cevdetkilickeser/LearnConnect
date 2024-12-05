@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.cevdetkilickeser.learnconnect.data.entity.course.Comment
 import com.cevdetkilickeser.learnconnect.data.entity.course.Course
 import com.cevdetkilickeser.learnconnect.data.entity.course.Enrollment
 import com.cevdetkilickeser.learnconnect.data.entity.course.LessonStatus
@@ -152,7 +153,7 @@ fun MyCoursesPreview() {
                 TODO("Not yet implemented")
             }
 
-            override suspend fun getCourseById(id: Int): Course {
+            override suspend fun getCourseById(courseId: Int): Course {
                 TODO("Not yet implemented")
             }
 
@@ -161,6 +162,14 @@ fun MyCoursesPreview() {
             }
 
             override suspend fun getCoursesInProgress(userId: Int): List<Course> {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun addComment(comment: Comment) {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun getComments(courseId: Int): List<Comment> {
                 TODO("Not yet implemented")
             }
 
