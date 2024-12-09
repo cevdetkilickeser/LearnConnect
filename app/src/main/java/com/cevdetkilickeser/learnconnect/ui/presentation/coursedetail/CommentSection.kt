@@ -33,10 +33,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.cevdetkilickeser.learnconnect.data.entity.User
+import com.cevdetkilickeser.learnconnect.R
 import com.cevdetkilickeser.learnconnect.data.entity.course.Comment
 
 @Composable
@@ -76,7 +76,7 @@ fun CommentSection(
                 TextField(
                     value = commentText,
                     onValueChange = { commentText = it },
-                    placeholder = { Text("Add a comment...") },
+                    placeholder = { Text(stringResource(id = R.string.add_comment)) },
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -88,7 +88,7 @@ fun CommentSection(
                     },
                     enabled = commentText.isNotBlank() && selectedRating > 0
                 ) {
-                    Text("Send")
+                    Text(stringResource(id = R.string.send))
                 }
             }
         }
@@ -171,23 +171,5 @@ fun RatingStars(
             )
         }
     }
-}
-
-fun getFakeComments(courseId: Int): List<Comment> = listOf(
-    Comment(1, courseId, User(1, "Alice", ""), "2024-12-01", "Great course!", 5),
-    Comment(2, courseId, User(2, "Bob", ""), "2024-12-02", "Very helpful.", 4),
-    Comment(3, courseId, User(3, "Charlie", ""), "2024-12-03", "Well explained.", 5),
-    Comment(1, courseId, User(1, "Alice", ""), "2024-12-01", "Great course!", 5),
-    Comment(2, courseId, User(2, "Bob", ""), "2024-12-02", "Very helpful.", 4),
-    Comment(2, courseId, User(2, "Bob", ""), "2024-12-02", "Very helpful.", 4),
-    Comment(2, courseId, User(2, "Bob", ""), "2024-12-02", "Very helpful.", 4),
-    Comment(2, courseId, User(2, "Bob", ""), "2024-12-02", "Very helpful.", 4),
-    Comment(3, courseId, User(3, "Charlie", ""), "2024-12-03", "Well explained.", 5),
-)
-
-@Preview(showBackground = true, name = "Light Mode")
-@Composable
-fun CommentSectionLightPreview() {
-    CommentSection(commentList = getFakeComments(1), addComment = { _, _ -> })
 }
 

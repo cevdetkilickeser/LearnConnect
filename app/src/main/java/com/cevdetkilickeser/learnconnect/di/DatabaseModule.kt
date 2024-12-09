@@ -1,6 +1,7 @@
 package com.cevdetkilickeser.learnconnect.di
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.room.Room
 import com.cevdetkilickeser.learnconnect.data.room.AppDatabase
 import dagger.Module
@@ -28,14 +29,18 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideUserDao(database: AppDatabase) = database.userDao()
-
-    @Provides
-    @Singleton
     fun provideCourseDao(database: AppDatabase) = database.courseDao()
 
     @Provides
     @Singleton
     fun provideLessonDao(database: AppDatabase) = database.lessonDao()
 
+    @Provides
+    @Singleton
+    fun provideUserDao(database: AppDatabase) = database.userDao()
+
+    @Provides
+    fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
+        return context.getSharedPreferences("my_preferences", Context.MODE_PRIVATE)
+    }
 }

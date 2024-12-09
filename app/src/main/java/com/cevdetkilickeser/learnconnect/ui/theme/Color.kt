@@ -2,7 +2,7 @@ package com.cevdetkilickeser.learnconnect.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val SharedPrimary = Color(0xFF6360FF)
+val SharedPrimary = Color(0xFF1566F3)
 
 
 val DarkBackground = Color(0xFF161719)

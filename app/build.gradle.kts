@@ -75,7 +75,7 @@ dependencies {
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
 
-    implementation(libs.coil.compose)
+    implementation (libs.compose)
 
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
@@ -92,6 +92,13 @@ dependencies {
     implementation(libs.androidx.media3.exoplayer.dash)
     implementation(libs.androidx.media3.exoplayer.hls)
     implementation(libs.androidx.media3.exoplayer.smoothstreaming)
+
+    implementation (libs.accompanist.permissions)
+
+    androidTestImplementation ("androidx.arch.core:core-testing:2.2.0")
+
+
+    androidTestImplementation (libs.truth)
 
 }
 

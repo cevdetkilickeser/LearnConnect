@@ -1,19 +1,24 @@
 package com.cevdetkilickeser.learnconnect.ui.presentation.profile
 
+import android.Manifest
+import android.app.Activity
+import android.content.Intent
+import android.os.Build
 import android.widget.Toast
-import androidx.compose.foundation.Image
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -21,6 +26,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -31,8 +37,8 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,18 +48,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.cevdetkilickeser.learnconnect.R
-import com.cevdetkilickeser.learnconnect.data.entity.User
-import com.cevdetkilickeser.learnconnect.data.repository.UserRepository
-import com.cevdetkilickeser.learnconnect.data.room.UserDao
-import com.cevdetkilickeser.learnconnect.ui.theme.LearnConnectTheme
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalGlideComposeApi::class)
 @Composable
 fun ProfileScreen(
     isDarkTheme: Boolean,
@@ -61,13 +68,30 @@ fun ProfileScreen(
     userId: Int,
     removeUserIdFromSharedPref: () -> Unit,
     navigateToSignIn: () -> Unit,
+    updateTopBarName: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
-    val user by viewModel.user.observeAsState()
-    var showDialog by remember { mutableStateOf(false) }
+    val user by viewModel.user.collectAsState()
+    val imageUri by viewModel.uri.collectAsState()
+    var showPasswordDialog by remember { mutableStateOf(false) }
+    var showNameDialog by remember { mutableStateOf(false) }
     val errorMessage = stringResource(id = R.string.password_changed)
     val successMessage = stringResource(id = R.string.password_not_changed)
+
+    val galleryPermission = rememberPermissionState(
+        if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_IMAGES
+        else Manifest.permission.READ_EXTERNAL_STORAGE
+    )
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val uri = result.data?.data
+            viewModel.uploadImage(userId, uri)
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.getUserInfo(userId)
@@ -80,12 +104,22 @@ fun ProfileScreen(
         }
     }
 
-    if (showDialog) {
+    if (showPasswordDialog) {
         ChangePasswordDialog(
-            onDismiss = { showDialog = false },
+            onDismiss = { showPasswordDialog = false },
             onConfirm = { currentPassword, newPassword ->
                 viewModel.changePassword(userId, currentPassword, newPassword)
-                showDialog = false
+                showPasswordDialog = false
+            }
+        )
+    }
+
+    if (showNameDialog) {
+        ChangeNameDialog(
+            onDismiss = { showNameDialog = false },
+            onConfirm = { name ->
+                viewModel.changeName(userId, name, updateTopBarName)
+                showNameDialog = false
             }
         )
     }
@@ -97,32 +131,62 @@ fun ProfileScreen(
                 color = MaterialTheme.colorScheme.primary
             )
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Box(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .fillMaxHeight(0.5f)
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.3f)
-                    .clip(
-                        shape = CircleShape
-                    )
-            )
-            Text(
-                text = user?.name ?: "",
-                color = MaterialTheme.colorScheme.onPrimary,
-                fontSize = MaterialTheme.typography.headlineMedium.fontSize
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = user?.email ?: "",
-                color = MaterialTheme.colorScheme.onPrimary,
-            )
+                    .padding(16.dp)
+                    .align(Alignment.Center)
+            ) {
+                Card(
+                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.onSurface),
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .size(200.dp)
+                        .clip(CircleShape)
+                        .clickable {
+                            if (galleryPermission.status.isGranted) {
+                                val intent = Intent(Intent.ACTION_PICK).apply {
+                                    type = "image/*"
+                                    flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                }
+                                galleryLauncher.launch(intent)
+                            } else {
+                                galleryPermission.launchPermissionRequest()
+                            }
+                        }
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        GlideImage(
+                            model = imageUri,
+                            contentDescription = null,
+                            failure = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+                Text(
+                    text = user?.email ?: "e-mail",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Text(
+                    text = user?.name ?: "Input Name",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                    modifier = Modifier.clickable { showNameDialog = true }
+                )
+            }
         }
         Surface(
             modifier = Modifier
@@ -148,7 +212,7 @@ fun ProfileScreen(
                         .background(
                             color = MaterialTheme.colorScheme.surface
                         )
-                        .clickable { showDialog = true }
+                        .clickable { showPasswordDialog = true }
                 ) {
                     Text(
                         text = "Change Password",
@@ -254,36 +318,37 @@ fun ChangePasswordDialog(
     )
 }
 
-@Preview(showBackground = true)
 @Composable
-fun ProfilePreview() {
-    LearnConnectTheme(false) {
-        val userDao = object : UserDao {
-            override suspend fun addUser(user: User): Long {
-                TODO("Not yet implemented")
-            }
+fun ChangeNameDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
 
-            override suspend fun isEmailExists(email: String): Boolean {
-                TODO("Not yet implemented")
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = "Set Name")
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text(text = "Name") },
+                    singleLine = true
+                )
             }
-
-            override suspend fun isUserExists(email: String, password: String): Int? {
-                TODO("Not yet implemented")
+        },
+        confirmButton = {
+            Button(onClick = { onConfirm(name) }) {
+                Text(text = "Confirm")
             }
-
-            override suspend fun getUserInfo(userId: Int): User {
-                TODO("Not yet implemented")
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) {
+                Text(text = "Cancel")
             }
-
-            override suspend fun changePassword(
-                userId: Int,
-                currentPassword: String,
-                newPassword: String
-            ): Int {
-                TODO("Not yet implemented")
-            }
-
         }
-        ProfileScreen(false, {},1, {}, {}, ProfileViewModel(UserRepository(userDao)))
-    }
+    )
 }

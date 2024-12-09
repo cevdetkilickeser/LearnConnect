@@ -35,15 +35,4 @@ class EnrollmentRepository @Inject constructor(
             courseDao.fillLessonStatusTable(lessonStatus)
         }
     }
-
-    private suspend fun cleanLessonStatusTable(userId: Int, courseId: Int) {
-        courseDao.cleanLessonStatusTable(userId, courseId)
-    }
-
-    suspend fun unEnroll(userId: Int, courseId: Int) {
-        return withContext(Dispatchers.IO) {
-            courseDao.unEnroll(userId, courseId)
-            cleanLessonStatusTable(userId, courseId)
-        }
-    }
 }

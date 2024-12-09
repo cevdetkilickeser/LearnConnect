@@ -3,8 +3,8 @@ package com.cevdetkilickeser.learnconnect.ui.presentation.coursedetail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cevdetkilickeser.learnconnect.data.entity.course.Comment
-import com.cevdetkilickeser.learnconnect.data.entity.course.Enrollment
 import com.cevdetkilickeser.learnconnect.data.entity.course.Course
+import com.cevdetkilickeser.learnconnect.data.entity.course.Enrollment
 import com.cevdetkilickeser.learnconnect.data.repository.CourseRepository
 import com.cevdetkilickeser.learnconnect.data.repository.EnrollmentRepository
 import com.cevdetkilickeser.learnconnect.data.repository.UserRepository
@@ -41,7 +41,7 @@ class CourseDetailViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getComments(courseId: Int){
+    private suspend fun getComments(courseId: Int) {
         val comments = courseRepository.getComments(courseId)
         _comments.value = comments
     }
@@ -59,14 +59,6 @@ class CourseDetailViewModel @Inject constructor(
             val enrollment = Enrollment(0, userId, courseId)
             _isEnrolled.value = enrollmentRepository.enrollToCourse(enrollment)
         }
-    }
-
-    fun unEnroll(userId: Int, courseId: Int) {
-        viewModelScope.launch {
-            enrollmentRepository.unEnroll(userId, courseId)
-            _isEnrolled.value = false
-        }
-
     }
 
     fun addComment(userId: Int, courseId: Int, comment: String, rate: Int) {

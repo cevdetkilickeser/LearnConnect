@@ -1,5 +1,6 @@
 package com.cevdetkilickeser.learnconnect.ui.presentation.signin
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,20 +35,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.cevdetkilickeser.learnconnect.R
-import com.cevdetkilickeser.learnconnect.data.entity.User
-import com.cevdetkilickeser.learnconnect.data.repository.UserRepository
-import com.cevdetkilickeser.learnconnect.data.room.UserDao
-import com.cevdetkilickeser.learnconnect.ui.theme.LearnConnectTheme
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun SignInScreen(
     viewModel: SignInViewModel = hiltViewModel(),
@@ -55,13 +54,18 @@ fun SignInScreen(
     navigateToHome: () -> Unit,
     navigateToSignUp: () -> Unit
 ) {
+    val context = LocalContext.current
     val userId by viewModel.userId.collectAsState()
-    val isSignInSuccessful by viewModel.isSignInSuccessful.collectAsState()
 
-    LaunchedEffect(isSignInSuccessful) {
-        if (isSignInSuccessful) {
-            saveUserIdToShared(userId)
-            navigateToHome()
+    LaunchedEffect(Unit) {
+        viewModel.isSignInSuccessful.collect { isSuccessful ->
+            if (isSuccessful == false) {
+                Toast.makeText(context, "Your email or password is wrong", Toast.LENGTH_SHORT)
+                    .show()
+            } else if (isSuccessful == true) {
+                saveUserIdToShared(userId)
+                navigateToHome()
+            }
         }
     }
 
@@ -83,15 +87,12 @@ fun SignInScreen(
         ) {
             Surface(
                 shape = RoundedCornerShape(32.dp),
-                color = Color.White,
                 modifier = Modifier.size(128.dp)
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = stringResource(id = R.string.app_logo),
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    tint = MaterialTheme.colorScheme.primary
+                GlideImage(
+                    model = R.drawable.ic_app_icon,
+                    contentDescription = stringResource(id = R.string.app_name),
+                    modifier = Modifier.padding(16.dp)
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -190,43 +191,5 @@ fun SignInScreen(
                 )
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SignInScreenThemedPreview() {
-    LearnConnectTheme {
-        val userDao = object : UserDao {
-            override suspend fun isUserExists(email: String, password: String): Int? {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun isEmailExists(email: String): Boolean {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun addUser(user: User): Long {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun getUserInfo(userId: Int): User {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun changePassword(
-                userId: Int,
-                currentPassword: String,
-                newPassword: String
-            ): Int {
-                TODO("Not yet implemented")
-            }
-        }
-        SignInScreen(
-            saveUserIdToShared = {},
-            navigateToHome = {},
-            navigateToSignUp = {},
-            viewModel = SignInViewModel(UserRepository(userDao))
-        )
     }
 }

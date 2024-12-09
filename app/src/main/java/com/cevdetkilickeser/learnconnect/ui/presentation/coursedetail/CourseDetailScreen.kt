@@ -1,5 +1,6 @@
 package com.cevdetkilickeser.learnconnect.ui.presentation.coursedetail
 
+import android.content.pm.ActivityInfo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -41,26 +42,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cevdetkilickeser.learnconnect.R
-import com.cevdetkilickeser.learnconnect.data.entity.User
-import com.cevdetkilickeser.learnconnect.data.entity.course.Comment
-import com.cevdetkilickeser.learnconnect.data.entity.course.Course
-import com.cevdetkilickeser.learnconnect.data.entity.course.Enrollment
-import com.cevdetkilickeser.learnconnect.data.entity.course.Lesson
-import com.cevdetkilickeser.learnconnect.data.entity.course.LessonStatus
-import com.cevdetkilickeser.learnconnect.data.repository.CourseRepository
-import com.cevdetkilickeser.learnconnect.data.repository.EnrollmentRepository
-import com.cevdetkilickeser.learnconnect.data.repository.UserRepository
-import com.cevdetkilickeser.learnconnect.data.room.CourseDao
-import com.cevdetkilickeser.learnconnect.data.room.LessonDao
-import com.cevdetkilickeser.learnconnect.data.room.UserDao
-import com.cevdetkilickeser.learnconnect.ui.theme.LearnConnectTheme
+import com.cevdetkilickeser.learnconnect.ui.presentation.watchcourse.setScreenOrientation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,12 +60,18 @@ fun CourseDetailScreen(
     viewModel: CourseDetailViewModel = hiltViewModel()
 ) {
 
+    val context = LocalContext.current
     val course by viewModel.course.collectAsState()
     val commentList by viewModel.comments.collectAsState()
     val isEnrolled by viewModel.isEnrolled.collectAsState()
     var showCommentsSheet by remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        setScreenOrientation(context, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+    }
+
     LaunchedEffect(isEnrolled) {
+        viewModel.getCourseById(courseId)
         viewModel.getCourseById(courseId)
         viewModel.checkEnrollmentStatus(userId, courseId)
     }
@@ -200,7 +195,6 @@ fun CourseDetailScreen(
                         Button(
                             onClick = {
                                 showCommentsSheet = true
-                                viewModel.unEnroll(userId, courseId)
                             },
                             modifier = Modifier
                                 .weight(1f),
@@ -232,7 +226,7 @@ fun AuthorCart(name: String, courseCount: String, studentCount: String) {
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = "Course Image",
+                contentDescription = null,
                 modifier = Modifier
                     .padding(8.dp)
                     .size(64.dp)
@@ -255,102 +249,5 @@ fun AuthorCart(name: String, courseCount: String, studentCount: String) {
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun CourseDetailPreview() {
-    LearnConnectTheme(false) {
-        val userDao = object : UserDao {
-            override suspend fun isUserExists(email: String, password: String): Int? {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun isEmailExists(email: String): Boolean {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun addUser(user: User): Long {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun getUserInfo(userId: Int): User {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun changePassword(
-                userId: Int,
-                currentPassword: String,
-                newPassword: String
-            ): Int {
-                TODO("Not yet implemented")
-            }
-
-        }
-        val courseDao = object : CourseDao {
-            override suspend fun getCategories(): List<String> {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun getCourses(): List<Course> {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun getCourseById(courseId: Int): Course {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun getCoursesDone(userId: Int): List<Course> {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun getCoursesInProgress(userId: Int): List<Course> {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun addComment(comment: Comment) {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun getComments(courseId: Int): List<Comment> {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun checkEnrollmentStatus(userId: Int, courseId: Int): Boolean {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun enrollToCourse(enrollment: Enrollment): Long {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun unEnroll(userId: Int, courseId: Int) {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun fillLessonStatusTable(lessonStatus: LessonStatus) {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun cleanLessonStatusTable(userId: Int, courseId: Int) {
-                TODO("Not yet implemented")
-            }
-        }
-        val lessonDao = object : LessonDao {
-            override suspend fun getLessonsByCourseId(courseId: Int): List<Lesson> {
-                TODO("Not yet implemented")
-            }
-        }
-        CourseDetailScreen(
-            1,
-            2,
-            {},
-            CourseDetailViewModel(
-                UserRepository(userDao),
-                CourseRepository(courseDao),
-                EnrollmentRepository(courseDao, lessonDao)
-            )
-        )
     }
 }

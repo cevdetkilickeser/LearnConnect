@@ -18,8 +18,8 @@ interface CourseDao {
     @Query("SELECT * FROM courses")
     suspend fun getCourses(): List<Course>
 
-    @Query("SELECT * FROM courses WHERE courseId = :courseId")
-    suspend fun getCourseById(courseId: Int): Course
+    @Query("SELECT * FROM courses WHERE courseId = :id")
+    suspend fun getCourseById(id: Int): Course
 
     @Query(
         """
@@ -58,9 +58,6 @@ interface CourseDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun enrollToCourse(enrollment: Enrollment): Long
-
-    @Query("DELETE FROM enrollments WHERE userId = :userId AND courseId = :courseId")
-    suspend fun unEnroll(userId: Int, courseId: Int)
 
     @Insert
     suspend fun fillLessonStatusTable(lessonStatus: LessonStatus)

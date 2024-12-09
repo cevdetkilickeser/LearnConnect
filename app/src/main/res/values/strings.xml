@@ -9,13 +9,22 @@
     <string name="sign_out">Sign Out</string>
     <string name="dont_have_account">Don\'t have an account?</string>
     <string name="already_have_account">Already have an account?</string>
+    <string name="email_already_taken">This email is already taken</string>
     <string name="thanks">Thanks to Harum Shidiqi for UI kit</string>
-    <string name="password_changed">"Password changed successfully"</string>
-    <string name="password_not_changed">"Current password incorrect"</string>
     <string name="description">Description</string>
     <string name="author">Author</string>
     <string name="enroll">Enroll</string>
     <string name="watch">Watch</string>
     <string name="comments">Comments</string>
     <string name="lesson">Lesson</string>
+    <string name="password_changed">Password changed successfully</string>
+    <string name="password_not_changed">Current password incorrect</string>
+    <string name="downloading">Downloading</string>
+    <string name="permission_allowed">Permissions Granted</string>
+    <string name="permission_denied">Permissions Denied</string>
+    <string name="welcome">Welcome</string>
+    <string name="add_comment">Add a comment…</string>
+    <string name="send">Send</string>
+    <string name="inProgress">In Progress</string>
+    <string name="done">Done</string>
 </resources>

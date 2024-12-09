@@ -1,6 +1,8 @@
 package com.cevdetkilickeser.learnconnect.navigation
 
 import android.content.SharedPreferences
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -12,7 +14,9 @@ import com.cevdetkilickeser.learnconnect.ui.presentation.mycourses.MyCoursesScre
 import com.cevdetkilickeser.learnconnect.ui.presentation.profile.ProfileScreen
 import com.cevdetkilickeser.learnconnect.ui.presentation.signin.SignInScreen
 import com.cevdetkilickeser.learnconnect.ui.presentation.signup.SignUpScreen
+import com.cevdetkilickeser.learnconnect.ui.presentation.watchcourse.WatchCourseScreen
 
+@RequiresApi(Build.VERSION_CODES.R)
 @Composable
 fun AppNavigation(
     isDarkTheme: Boolean,
@@ -20,6 +24,7 @@ fun AppNavigation(
     sharedPref: SharedPreferences,
     startDestination: String,
     navController: NavHostController,
+    updateTopBarName: () -> Unit,
     modifier: Modifier
 ) {
 
@@ -103,7 +108,8 @@ fun AppNavigation(
                             inclusive = true
                         }
                     }
-                }
+                },
+                updateTopBarName = updateTopBarName
             )
         }
         composable(Screen.CourseDetail.route) { backStackEntry ->
@@ -116,6 +122,11 @@ fun AppNavigation(
                     navController.navigate(Screen.WatchCourse.withArgs(courseId))
                 }
             )
+        }
+        composable(Screen.WatchCourse.route) { backStackEntry ->
+            val courseId = backStackEntry.arguments?.getString("courseId") ?: "0"
+            val userId = getUserIdFromSharedPref()
+            WatchCourseScreen(userId = userId, courseId = courseId.toInt())
         }
     }
 }

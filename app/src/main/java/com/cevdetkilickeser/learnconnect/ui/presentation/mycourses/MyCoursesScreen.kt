@@ -1,5 +1,6 @@
 package com.cevdetkilickeser.learnconnect.ui.presentation.mycourses
 
+import android.content.pm.ActivityInfo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,17 +26,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.cevdetkilickeser.learnconnect.data.entity.course.Comment
+import com.cevdetkilickeser.learnconnect.R
 import com.cevdetkilickeser.learnconnect.data.entity.course.Course
-import com.cevdetkilickeser.learnconnect.data.entity.course.Enrollment
-import com.cevdetkilickeser.learnconnect.data.entity.course.LessonStatus
-import com.cevdetkilickeser.learnconnect.data.repository.CourseRepository
-import com.cevdetkilickeser.learnconnect.data.room.CourseDao
 import com.cevdetkilickeser.learnconnect.ui.presentation.home.CourseItem
-import com.cevdetkilickeser.learnconnect.ui.theme.LearnConnectTheme
+import com.cevdetkilickeser.learnconnect.ui.presentation.watchcourse.setScreenOrientation
 
 @Composable
 fun MyCoursesScreen(
@@ -44,9 +42,15 @@ fun MyCoursesScreen(
     viewModel: MyCoursesViewModel = hiltViewModel()
 ) {
 
+    val context = LocalContext.current
     val inProgressCourses by viewModel.inProgressCourses.collectAsState()
     val doneCourses by viewModel.doneCourses.collectAsState()
     val selectedTabIndex = remember { mutableIntStateOf(CourseStatus.IN_PROGRESS.ordinal) }
+
+
+    LaunchedEffect(Unit) {
+        setScreenOrientation(context, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+    }
 
     LaunchedEffect(userId) {
         viewModel.getEnrolledCourses(userId)
@@ -83,12 +87,12 @@ fun MyCoursesScreen(
                     Tab(
                         selected = selectedTabIndex.intValue == CourseStatus.IN_PROGRESS.ordinal,
                         onClick = { selectedTabIndex.intValue = CourseStatus.IN_PROGRESS.ordinal },
-                        text = { Text(text = "InProgress") }
+                        text = { Text(text = stringResource(id = R.string.inProgress)) }
                     )
                     Tab(
                         selected = selectedTabIndex.intValue == CourseStatus.DONE.ordinal,
                         onClick = { selectedTabIndex.intValue = CourseStatus.DONE.ordinal },
-                        text = { Text(text = "Done") }
+                        text = { Text(text = stringResource(id = R.string.done)) }
                     )
                 }
                 Spacer(modifier = Modifier.height(32.dp))
@@ -138,67 +142,4 @@ fun DoneCourses(courseList: List<Course>, navigateToWatchCourse: (Int) -> Unit) 
 
 enum class CourseStatus {
     IN_PROGRESS, DONE
-}
-
-@Preview(showBackground = true)
-@Composable
-fun MyCoursesPreview() {
-    LearnConnectTheme(false) {
-        val courseDao = object : CourseDao {
-            override suspend fun getCategories(): List<String> {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun getCourses(): List<Course> {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun getCourseById(courseId: Int): Course {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun getCoursesDone(userId: Int): List<Course> {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun getCoursesInProgress(userId: Int): List<Course> {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun addComment(comment: Comment) {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun getComments(courseId: Int): List<Comment> {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun checkEnrollmentStatus(userId: Int, courseId: Int): Boolean {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun enrollToCourse(enrollment: Enrollment): Long {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun unEnroll(userId: Int, courseId: Int) {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun fillLessonStatusTable(lessonStatus: LessonStatus) {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun cleanLessonStatusTable(userId: Int, courseId: Int) {
-                TODO("Not yet implemented")
-            }
-
-        }
-        MyCoursesScreen(
-            1, {},
-            MyCoursesViewModel(
-                CourseRepository(courseDao)
-            )
-        )
-    }
 }

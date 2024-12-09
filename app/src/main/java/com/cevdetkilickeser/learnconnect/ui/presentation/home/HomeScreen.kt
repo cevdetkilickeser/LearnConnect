@@ -40,17 +40,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cevdetkilickeser.learnconnect.R
-import com.cevdetkilickeser.learnconnect.data.entity.course.Comment
 import com.cevdetkilickeser.learnconnect.data.entity.course.Course
-import com.cevdetkilickeser.learnconnect.data.entity.course.Enrollment
-import com.cevdetkilickeser.learnconnect.data.entity.course.LessonStatus
-import com.cevdetkilickeser.learnconnect.data.repository.CourseRepository
-import com.cevdetkilickeser.learnconnect.data.room.CourseDao
-import com.cevdetkilickeser.learnconnect.ui.theme.LearnConnectTheme
 
 @Composable
 fun HomeScreen(
@@ -221,62 +214,5 @@ fun CourseItem(
                 )
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HomePreview() {
-    LearnConnectTheme(false) {
-        val courseDao = object : CourseDao {
-            override suspend fun getCategories(): List<String> {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun getCourses(): List<Course> {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun getCourseById(courseId: Int): Course {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun getCoursesDone(userId: Int): List<Course> {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun getCoursesInProgress(userId: Int): List<Course> {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun addComment(comment: Comment) {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun getComments(courseId: Int): List<Comment> {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun checkEnrollmentStatus(userId: Int, courseId: Int): Boolean {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun enrollToCourse(enrollment: Enrollment): Long {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun unEnroll(userId: Int, courseId: Int) {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun fillLessonStatusTable(lessonStatus: LessonStatus) {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun cleanLessonStatusTable(userId: Int, courseId: Int) {
-                TODO("Not yet implemented")
-            }
-        }
-        HomeScreen(navigateToCourseDetail = {}, viewModel = HomeViewModel(CourseRepository(courseDao)))
     }
 }
