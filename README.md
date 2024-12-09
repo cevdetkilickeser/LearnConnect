@@ -1,3 +1,15 @@
+# 🎓 **Online Kurs Uygulaması**
+
+Eğitim dünyasına yeni bir bakış! Bu uygulama ile kullanıcılar diledikleri kurslara kaydolabilir, videoları izleyebilir ve öğrenim süreçlerini daha verimli bir şekilde yönetebilir.
+
+## 🚀 **Kurulum Adımları**
+
+ **Proje Dosyasını Klonlayın**  
+   ```bash
+   git clone https://github.com/cevdetkilickeser/LearnConnect.git
+   cd LearnConnect
+   ```
+
 ## 🏗️ **Kullanılan Mimari ve Teknolojiler**
 
 ### 📦 **Mimari: MVVM (Model-View-ViewModel)**  
