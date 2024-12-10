@@ -109,7 +109,7 @@ fun AppNavigation(
                         }
                     }
                 },
-                updateTopBarName = updateTopBarName
+                updateTopBarName = { updateTopBarName() }
             )
         }
         composable(Screen.CourseDetail.route) { backStackEntry ->
