@@ -5,9 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.cevdetkilickeser.learnconnect.data.entity.course.Comment
 import com.cevdetkilickeser.learnconnect.data.entity.course.Course
 import com.cevdetkilickeser.learnconnect.data.entity.course.Enrollment
-import com.cevdetkilickeser.learnconnect.data.repository.CourseRepository
-import com.cevdetkilickeser.learnconnect.data.repository.EnrollmentRepository
-import com.cevdetkilickeser.learnconnect.data.repository.UserRepository
+import com.cevdetkilickeser.learnconnect.domain.repository.CourseRepositoryImpl
+import com.cevdetkilickeser.learnconnect.domain.repository.EnrollmentRepositoryImpl
+import com.cevdetkilickeser.learnconnect.domain.repository.UserRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,9 +19,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CourseDetailViewModel @Inject constructor(
-    private val userRepository: UserRepository,
-    private val courseRepository: CourseRepository,
-    private val enrollmentRepository: EnrollmentRepository
+    private val userRepository: UserRepositoryImpl,
+    private val courseRepository: CourseRepositoryImpl,
+    private val enrollmentRepository: EnrollmentRepositoryImpl
 ) : ViewModel() {
 
     private val _course = MutableStateFlow(Course(0, "", "", ""))

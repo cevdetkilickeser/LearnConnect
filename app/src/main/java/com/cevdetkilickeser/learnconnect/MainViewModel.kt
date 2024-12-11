@@ -2,7 +2,7 @@ package com.cevdetkilickeser.learnconnect
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cevdetkilickeser.learnconnect.data.repository.UserRepository
+import com.cevdetkilickeser.learnconnect.domain.repository.UserRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(private val userRepository: UserRepository) : ViewModel() {
+class MainViewModel @Inject constructor(private val userRepository: UserRepositoryImpl) : ViewModel() {
 
     private val _name = MutableStateFlow<String?>(null)
     val name: StateFlow<String?> = _name

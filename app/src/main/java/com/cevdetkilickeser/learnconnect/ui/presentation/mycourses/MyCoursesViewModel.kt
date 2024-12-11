@@ -3,7 +3,7 @@ package com.cevdetkilickeser.learnconnect.ui.presentation.mycourses
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cevdetkilickeser.learnconnect.data.entity.course.Course
-import com.cevdetkilickeser.learnconnect.data.repository.CourseRepository
+import com.cevdetkilickeser.learnconnect.domain.repository.CourseRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MyCoursesViewModel @Inject constructor(
-    private val courseRepository: CourseRepository
+    private val courseRepository: CourseRepositoryImpl
 ) : ViewModel() {
 
     private val _inProgressCourses = MutableStateFlow<List<Course>>(emptyList())

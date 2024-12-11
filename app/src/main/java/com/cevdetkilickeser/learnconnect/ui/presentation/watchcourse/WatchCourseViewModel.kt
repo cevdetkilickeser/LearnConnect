@@ -7,8 +7,8 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.cevdetkilickeser.learnconnect.data.entity.course.LessonStatus
-import com.cevdetkilickeser.learnconnect.data.repository.DownloadRepository
-import com.cevdetkilickeser.learnconnect.data.repository.LessonRepository
+import com.cevdetkilickeser.learnconnect.domain.repository.DownloadRepositoryImpl
+import com.cevdetkilickeser.learnconnect.domain.repository.LessonRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -20,8 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WatchCourseViewModel @Inject constructor(
-    private val lessonRepository: LessonRepository,
-    private val downloadRepository: DownloadRepository
+    private val lessonRepository: LessonRepositoryImpl,
+    private val downloadRepository: DownloadRepositoryImpl
 ) : ViewModel() {
 
     private val _isFullScreen = MutableStateFlow(false)

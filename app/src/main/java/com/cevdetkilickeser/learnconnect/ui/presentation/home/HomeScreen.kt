@@ -1,18 +1,14 @@
 package com.cevdetkilickeser.learnconnect.ui.presentation.home
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -20,8 +16,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -35,15 +29,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.cevdetkilickeser.learnconnect.R
-import com.cevdetkilickeser.learnconnect.data.entity.course.Course
 
 @Composable
 fun HomeScreen(
@@ -86,7 +76,9 @@ fun HomeScreen(
                                 }
                         )
                     },
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
                     shape = MaterialTheme.shapes.medium,
                     singleLine = true
                 )
@@ -99,15 +91,26 @@ fun HomeScreen(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
-                CategoryButtonsRow(
-                    categoryList = categoryList,
-                    selectedCategory = selectedCategory,
-                    getFilteredCourseList = { label ->
-                        query = ""
-                        selectedCategory = label
-                        viewModel.getFilteredCourses(label)
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    items(categoryList) { label ->
+                        val isSelected = selectedCategory == label
+                        FilterChip(
+                            selected = isSelected,
+                            onClick = {
+                                viewModel.getFilteredCourses(if (isSelected) null else label)
+                            },
+                            label = { Text(label) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                selectedLabelColor = Color.White
+                            ),
+                            modifier = Modifier.padding(8.dp)
+                        )
                     }
-                )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -117,101 +120,16 @@ fun HomeScreen(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
-                CourseItemList(
-                    courseList = courseList,
-                    navigateToCourseDetail = { courseId ->
-                        navigateToCourseDetail(courseId)
+                LazyColumn {
+                    items(courseList) { course ->
+                        CourseItem(
+                            course = course,
+                            navigateToCourseDetail = { courseId ->
+                                navigateToCourseDetail(courseId)
+                            }
+                        )
                     }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun CategoryButtonsRow(
-    categoryList: List<String>,
-    selectedCategory: String?,
-    getFilteredCourseList: (String?) -> Unit
-) {
-
-    LazyRow(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        items(categoryList) { label ->
-            val isSelected = selectedCategory == label
-            FilterChip(
-                selected = isSelected,
-                onClick = {
-                    getFilteredCourseList(if (isSelected) null else label)
-                },
-                label = { Text(label) },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primary,
-                    selectedLabelColor = Color.White
-                ),
-                modifier = Modifier.padding(8.dp)
-            )
-        }
-    }
-}
-
-@Composable
-fun CourseItemList(
-    courseList: List<Course>,
-    navigateToCourseDetail: (String) -> Unit
-) {
-    LazyColumn {
-        items(courseList) { course ->
-            CourseItem(
-                course = course,
-                navigateToCourseDetail = { courseId ->
-                    navigateToCourseDetail(courseId)
                 }
-            )
-        }
-    }
-}
-
-@Composable
-fun CourseItem(
-    course: Course,
-    navigateToCourseDetail: (String) -> Unit
-) {
-    Card(
-        onClick = { navigateToCourseDetail(course.courseId.toString()) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.background(color = MaterialTheme.colorScheme.surface)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = "Course Image",
-                modifier = Modifier
-                    .padding(8.dp)
-                    .size(64.dp)
-                    .clip(MaterialTheme.shapes.small)
-            )
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .weight(1f)
-            ) {
-                Text(
-                    text = course.courseName,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    text = course.author,
-                    style = MaterialTheme.typography.bodySmall
-                )
             }
         }
     }

@@ -31,9 +31,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cevdetkilickeser.learnconnect.R
-import com.cevdetkilickeser.learnconnect.data.entity.course.Course
+import com.cevdetkilickeser.learnconnect.setScreenOrientation
 import com.cevdetkilickeser.learnconnect.ui.presentation.home.CourseItem
-import com.cevdetkilickeser.learnconnect.ui.presentation.watchcourse.setScreenOrientation
 
 @Composable
 fun MyCoursesScreen(
@@ -97,49 +96,25 @@ fun MyCoursesScreen(
                 }
                 Spacer(modifier = Modifier.height(32.dp))
                 when (selectedTabIndex.intValue) {
-                    CourseStatus.IN_PROGRESS.ordinal -> InProgressCourses(
-                        courseList = inProgressCourses,
-                        navigateToWatchCourse = { courseId ->
-                            navigateToWatchCourse(courseId)
+                    CourseStatus.IN_PROGRESS.ordinal -> LazyColumn {
+                        items(inProgressCourses) { course ->
+                            CourseItem(
+                                course = course,
+                                navigateToCourseDetail = { navigateToWatchCourse(course.courseId) }
+                            )
                         }
-                    )
+                    }
 
-                    CourseStatus.DONE.ordinal -> DoneCourses(
-                        courseList = doneCourses,
-                        navigateToWatchCourse = { courseId ->
-                            navigateToWatchCourse(courseId)
+                    CourseStatus.DONE.ordinal -> LazyColumn {
+                        items(doneCourses) { course ->
+                            CourseItem(
+                                course = course,
+                                navigateToCourseDetail = { navigateToWatchCourse(course.courseId) }
+                            )
                         }
-                    )
+                    }
                 }
             }
         }
     }
-}
-
-@Composable
-fun InProgressCourses(courseList: List<Course>, navigateToWatchCourse: (Int) -> Unit) {
-    LazyColumn {
-        items(courseList) { course ->
-            CourseItem(
-                course = course,
-                navigateToCourseDetail = { navigateToWatchCourse(course.courseId) }
-            )
-        }
-    }
-}
-
-@Composable
-fun DoneCourses(courseList: List<Course>, navigateToWatchCourse: (Int) -> Unit) {
-    LazyColumn {
-        items(courseList) { course ->
-            CourseItem(
-                course = course,
-                navigateToCourseDetail = { navigateToWatchCourse(course.courseId) }
-            )
-        }
-    }
-}
-
-enum class CourseStatus {
-    IN_PROGRESS, DONE
 }

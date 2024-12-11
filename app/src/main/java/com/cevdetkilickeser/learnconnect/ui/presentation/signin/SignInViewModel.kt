@@ -2,7 +2,7 @@ package com.cevdetkilickeser.learnconnect.ui.presentation.signin
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cevdetkilickeser.learnconnect.data.repository.UserRepository
+import com.cevdetkilickeser.learnconnect.domain.repository.UserRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SignInViewModel @Inject constructor(private val userRepository: UserRepository) :
+class SignInViewModel @Inject constructor(private val userRepository: UserRepositoryImpl) :
     ViewModel() {
 
     private val _userId = MutableStateFlow(-1)

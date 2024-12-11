@@ -1,34 +1,23 @@
 package com.cevdetkilickeser.learnconnect.ui.presentation.watchcourse
 
 import android.Manifest
-import android.app.Activity
-import android.content.Context
 import android.content.pm.ActivityInfo
 import android.os.Build
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -49,10 +38,8 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
-import com.cevdetkilickeser.learnconnect.data.entity.course.LessonStatus
+import com.cevdetkilickeser.learnconnect.setScreenOrientation
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionState
-import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -169,134 +156,6 @@ fun WatchCourseScreen(
                 currentPlayingLessonNumber = currentPlayingLessonNumber ?: 1,
                 isInternetAvailable = isInternetAvailable
             )
-        }
-    }
-}
-
-fun setScreenOrientation(context: Context, orientation: Int) {
-    val activity = context as? Activity
-    activity?.requestedOrientation = orientation
-}
-
-@Composable
-fun ShowInternetConnection(isInternetAvailable: Boolean) {
-    if (!isInternetAvailable) {
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = Color.Red)
-        ) {
-            Text(text = "No Internet Connection", color = Color.White)
-        }
-    }
-}
-
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-fun LessonList(
-    lessons: List<LessonStatus>,
-    context: Context,
-    storagePermission: PermissionState,
-    viewModel: WatchCourseViewModel,
-    exoPlayer: ExoPlayer,
-    userId: Int,
-    courseId: Int,
-    currentPlayingLessonNumber: Int,
-    isInternetAvailable: Boolean
-) {
-    LazyColumn {
-        items(lessons) { lesson ->
-            LessonItem(
-                context = context,
-                storagePermission = storagePermission,
-                lesson = lesson,
-                isDownloaded = lesson.isDownloaded,
-                isPlayingNow = currentPlayingLessonNumber == lesson.lesson.lessonNumber,
-                onClickLessonItem = {
-                    viewModel.onClickLessonItem(
-                        exoPlayer,
-                        userId,
-                        courseId,
-                        lesson.lesson.lessonNumber
-                    )
-                },
-                downloadVideo = {
-                    if (isInternetAvailable) {
-                        viewModel.downloadLesson(
-                            userId,
-                            courseId,
-                            lesson.lesson.lessonNumber,
-                            lesson.lesson.lessonUrl,
-                            lesson.lesson.lessonTitle
-                        )
-                    } else {
-                        Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                }
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-fun LessonItem(
-    context: Context,
-    storagePermission: PermissionState,
-    lesson: LessonStatus,
-    isDownloaded: Boolean,
-    isPlayingNow: Boolean,
-    onClickLessonItem: () -> Unit,
-    downloadVideo: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .clickable { onClickLessonItem() },
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = lesson.lesson.lessonNumber.toString(),
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(1f)
-        )
-        Text(
-            text = lesson.lesson.lessonTitle,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(2f),
-            color = if (isPlayingNow) Color.Green else Color.Unspecified
-        )
-        if (isDownloaded) {
-            IconButton(
-                onClick = {
-                    Toast.makeText(context, "Already Downloaded", Toast.LENGTH_SHORT).show()
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Download,
-                    contentDescription = null,
-                    tint = Color.Green
-                )
-            }
-        } else {
-            IconButton(
-                onClick = {
-                    if (storagePermission.status.isGranted) {
-                        downloadVideo()
-                    } else {
-                        storagePermission.launchPermissionRequest()
-                    }
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Download,
-                    contentDescription = null
-                )
-            }
         }
     }
 }

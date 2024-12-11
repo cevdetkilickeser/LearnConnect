@@ -3,7 +3,7 @@ package com.cevdetkilickeser.learnconnect.ui.presentation.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cevdetkilickeser.learnconnect.data.entity.course.Course
-import com.cevdetkilickeser.learnconnect.data.repository.CourseRepository
+import com.cevdetkilickeser.learnconnect.domain.repository.CourseRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(private val courseRepository: CourseRepository) :
+class HomeViewModel @Inject constructor(private val courseRepository: CourseRepositoryImpl) :
     ViewModel() {
 
     private val _categoryList = MutableStateFlow<List<String>>(emptyList())
