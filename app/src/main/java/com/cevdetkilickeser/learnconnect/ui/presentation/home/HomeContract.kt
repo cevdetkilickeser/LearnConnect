@@ -3,20 +3,20 @@ package com.cevdetkilickeser.learnconnect.ui.presentation.home
 import com.cevdetkilickeser.learnconnect.data.entity.course.Course
 
 object HomeContract {
-    data class HomeState(
+    data class UiState(
         val categoryList: List<String> = emptyList(),
         val courseList: List<Course> = emptyList(),
         val query: String = "",
         val selectedCategory: String? = null
     )
 
-    sealed interface HomeAction {
-        data class QueryChanged(val query: String) : HomeAction
-        data class CategorySelected(val selectedCategory: String?) : HomeAction
-        data class CourseClicked(val courseId: String) : HomeAction
+    sealed interface UiAction {
+        data class QueryChanged(val query: String) : UiAction
+        data class CategorySelected(val selectedCategory: String?) : UiAction
+        data class CourseClicked(val courseId: String) : UiAction
     }
 
-    sealed class HomeEffect {
-        data class NavigateToCourseDetail(val courseId: String) : HomeEffect()
+    sealed class UiEffect {
+        data class NavigateToCourseDetail(val courseId: String) : UiEffect()
     }
 }

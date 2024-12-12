@@ -28,22 +28,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.cevdetkilickeser.learnconnect.collectWithLifecycle
-import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeContract.HomeAction
-import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeContract.HomeEffect
-import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeContract.HomeState
+import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeContract.UiAction
+import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeContract.UiEffect
+import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeContract.UiState
 import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun HomeScreen(
-    homeState: HomeState,
-    homeEffect: Flow<HomeEffect>,
-    homeAction: (HomeAction) -> Unit,
+    uiState: UiState,
+    uiEffect: Flow<UiEffect>,
+    uiAction: (UiAction) -> Unit,
     navigateToCourseDetail: (String) -> Unit,
 ) {
 
-    homeEffect.collectWithLifecycle { effect ->
+    uiEffect.collectWithLifecycle { effect ->
         when (effect) {
-            is HomeEffect.NavigateToCourseDetail -> {
+            is UiEffect.NavigateToCourseDetail -> {
                 navigateToCourseDetail(effect.courseId)
             }
         }
@@ -63,8 +63,8 @@ fun HomeScreen(
                 modifier = Modifier.padding(16.dp)
             ) {
                 OutlinedTextField(
-                    value = homeState.query,
-                    onValueChange = { homeAction(HomeAction.QueryChanged(it)) },
+                    value = uiState.query,
+                    onValueChange = { uiAction(UiAction.QueryChanged(it)) },
                     label = { Text("Search...") },
                     trailingIcon = {
                         Icon(
@@ -91,13 +91,13 @@ fun HomeScreen(
                 LazyRow(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    items(homeState.categoryList) { label ->
-                        val isSelected = homeState.selectedCategory == label
+                    items(uiState.categoryList) { label ->
+                        val isSelected = uiState.selectedCategory == label
                         FilterChip(
                             selected = isSelected,
                             onClick = {
                                 val selectedCategory = if (isSelected) null else label
-                                homeAction(HomeAction.CategorySelected((selectedCategory)))
+                                uiAction(UiAction.CategorySelected((selectedCategory)))
                             },
                             label = { Text(label) },
                             colors = FilterChipDefaults.filterChipColors(
@@ -118,11 +118,11 @@ fun HomeScreen(
                 )
 
                 LazyColumn {
-                    items(homeState.courseList) { course ->
+                    items(uiState.courseList) { course ->
                         CourseItem(
                             course = course,
                             navigateToCourseDetail = { courseId ->
-                                homeAction(HomeAction.CourseClicked(courseId))
+                                uiAction(UiAction.CourseClicked(courseId))
                             }
                         )
                     }

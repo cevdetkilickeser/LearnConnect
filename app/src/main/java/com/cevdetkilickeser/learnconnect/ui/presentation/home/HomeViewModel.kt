@@ -3,9 +3,9 @@ package com.cevdetkilickeser.learnconnect.ui.presentation.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cevdetkilickeser.learnconnect.domain.repository.CourseRepositoryImpl
-import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeContract.HomeAction
-import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeContract.HomeEffect
-import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeContract.HomeState
+import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeContract.UiAction
+import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeContract.UiEffect
+import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeContract.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -20,11 +20,11 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(private val courseRepository: CourseRepositoryImpl) :
     ViewModel() {
 
-    private val _homeState = MutableStateFlow(HomeState())
-    val homeState = _homeState.asStateFlow()
+    private val _uiState = MutableStateFlow(UiState())
+    val uiState = _uiState.asStateFlow()
 
-    private val _homeEffect by lazy { Channel<HomeEffect>() }
-    val homeEffect: Flow<HomeEffect> by lazy { _homeEffect.receiveAsFlow() }
+    private val _uiEffect by lazy { Channel<UiEffect>() }
+    val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
 
     init {
         getCategories()
@@ -34,7 +34,7 @@ class HomeViewModel @Inject constructor(private val courseRepository: CourseRepo
     private fun getCategories() {
         viewModelScope.launch {
             val categoryList = courseRepository.getCategories()
-            _homeState.update {
+            _uiState.update {
                 it.copy(categoryList = categoryList)
             }
         }
@@ -43,44 +43,44 @@ class HomeViewModel @Inject constructor(private val courseRepository: CourseRepo
     private fun getCourses() {
         viewModelScope.launch {
             val courseList= courseRepository.getCourses()
-            _homeState.update {
+            _uiState.update {
                 it.copy(courseList = courseList)
             }
         }
     }
 
-    fun onAction(homeAction: HomeAction) {
-        when (homeAction) {
-            is HomeAction.QueryChanged -> {
+    fun onAction(uiAction: UiAction) {
+        when (uiAction) {
+            is UiAction.QueryChanged -> {
                 updateHomeState {
-                    val searchResults = courseRepository.getSearchResults(homeAction.query)
-                    copy(query = homeAction.query, courseList = searchResults!!, selectedCategory = null)
+                    val searchResults = courseRepository.getSearchResults(uiAction.query)
+                    copy(query = uiAction.query, courseList = searchResults!!, selectedCategory = null)
                 }
             }
-            is HomeAction.CategorySelected -> {
+            is UiAction.CategorySelected -> {
                 updateHomeState {
                     val filteredCourseList =
-                        courseRepository.getFilteredCoursesByCategory(homeAction.selectedCategory)
+                        courseRepository.getFilteredCoursesByCategory(uiAction.selectedCategory)
                     copy(
                         courseList = filteredCourseList!!,
                         query = "",
-                        selectedCategory = homeAction.selectedCategory
+                        selectedCategory = uiAction.selectedCategory
                     )
                 }
             }
-            is HomeAction.CourseClicked -> {
+            is UiAction.CourseClicked -> {
                 viewModelScope.launch {
-                    emitHomeEffect(HomeEffect.NavigateToCourseDetail(homeAction.courseId))
+                    emitHomeEffect(UiEffect.NavigateToCourseDetail(uiAction.courseId))
                 }
             }
         }
     }
 
-    private fun updateHomeState(block: HomeState.() -> HomeState) {
-        _homeState.update(block)
+    private fun updateHomeState(block: UiState.() -> UiState) {
+        _uiState.update(block)
     }
 
-    private suspend fun emitHomeEffect(homeEffect: HomeEffect) {
-        _homeEffect.send(homeEffect)
+    private suspend fun emitHomeEffect(uiEffect: UiEffect) {
+        _uiEffect.send(uiEffect)
     }
 }

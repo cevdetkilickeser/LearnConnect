@@ -86,12 +86,12 @@ fun AppNavigation(
         }
         composable(Screen.Home.route) {
             val viewModel = hiltViewModel<HomeViewModel>()
-            val homeState = viewModel.homeState.collectAsStateWithLifecycle()
-            val homeEffect = viewModel.homeEffect
+            val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.uiEffect
             HomeScreen(
-                homeState = homeState.value,
-                homeEffect = homeEffect,
-                homeAction = viewModel::onAction,
+                uiState = uiState.value,
+                uiEffect = uiEffect,
+                uiAction = viewModel::onAction,
                 navigateToCourseDetail = { courseId ->
                     navController.navigate(Screen.CourseDetail.withArgs(courseId))
                 }
