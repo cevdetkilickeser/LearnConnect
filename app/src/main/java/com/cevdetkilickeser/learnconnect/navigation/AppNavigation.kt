@@ -5,11 +5,14 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.cevdetkilickeser.learnconnect.ui.presentation.coursedetail.CourseDetailScreen
 import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeScreen
+import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeViewModel
 import com.cevdetkilickeser.learnconnect.ui.presentation.mycourses.MyCoursesScreen
 import com.cevdetkilickeser.learnconnect.ui.presentation.profile.ProfileScreen
 import com.cevdetkilickeser.learnconnect.ui.presentation.signin.SignInScreen
@@ -82,7 +85,13 @@ fun AppNavigation(
             )
         }
         composable(Screen.Home.route) {
+            val viewModel = hiltViewModel<HomeViewModel>()
+            val homeState = viewModel.homeState.collectAsStateWithLifecycle()
+            val homeEffect = viewModel.homeEffect
             HomeScreen(
+                homeState = homeState.value,
+                homeEffect = homeEffect,
+                homeAction = viewModel::onAction,
                 navigateToCourseDetail = { courseId ->
                     navController.navigate(Screen.CourseDetail.withArgs(courseId))
                 }
