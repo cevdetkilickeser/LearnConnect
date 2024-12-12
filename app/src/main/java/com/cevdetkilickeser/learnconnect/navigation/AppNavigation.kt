@@ -16,7 +16,9 @@ import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeViewModel
 import com.cevdetkilickeser.learnconnect.ui.presentation.mycourses.MyCoursesScreen
 import com.cevdetkilickeser.learnconnect.ui.presentation.profile.ProfileScreen
 import com.cevdetkilickeser.learnconnect.ui.presentation.signin.SignInScreen
+import com.cevdetkilickeser.learnconnect.ui.presentation.signin.SignInViewModel
 import com.cevdetkilickeser.learnconnect.ui.presentation.signup.SignUpScreen
+import com.cevdetkilickeser.learnconnect.ui.presentation.signup.SignUpViewModel
 import com.cevdetkilickeser.learnconnect.ui.presentation.watchcourse.WatchCourseScreen
 
 @RequiresApi(Build.VERSION_CODES.R)
@@ -49,7 +51,13 @@ fun AppNavigation(
         modifier = modifier
     ) {
         composable(Screen.SignIn.route) {
+            val viewModel = hiltViewModel<SignInViewModel>()
+            val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.uiEffect
             SignInScreen(
+                uiState = uiState.value,
+                uiEffect = uiEffect,
+                uiAction = viewModel::onAction,
                 saveUserIdToShared = { userId ->
                     saveUserIdToSharedPref(userId)
                 },
@@ -64,7 +72,13 @@ fun AppNavigation(
             )
         }
         composable(Screen.SignUp.route) {
+            val viewModel = hiltViewModel<SignUpViewModel>()
+            val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.uiEffect
             SignUpScreen(
+                uiState = uiState.value,
+                uiEffect = uiEffect,
+                uiAction = viewModel::onAction,
                 saveUserIdToShared = { userId ->
                     saveUserIdToSharedPref(userId)
                 },

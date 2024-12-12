@@ -26,12 +26,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,35 +34,36 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.cevdetkilickeser.learnconnect.R
+import com.cevdetkilickeser.learnconnect.collectWithLifecycle
+import com.cevdetkilickeser.learnconnect.ui.presentation.signup.SignUpContract.UiAction
+import com.cevdetkilickeser.learnconnect.ui.presentation.signup.SignUpContract.UiEffect
+import com.cevdetkilickeser.learnconnect.ui.presentation.signup.SignUpContract.UiState
+import kotlinx.coroutines.flow.Flow
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun SignUpScreen(
-    viewModel: SignUpViewModel = hiltViewModel(),
+    uiState: UiState,
+    uiEffect: Flow<UiEffect>,
+    uiAction: (UiAction) -> Unit,
     saveUserIdToShared: (Int) -> Unit,
     navigateToProfile: () -> Unit,
     navigateToSignIn: () -> Unit
 ) {
     val context = LocalContext.current
-    val userId by viewModel.userId.collectAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.isSignUpSuccessful.collect { isSuccessful ->
-            if (isSuccessful == false) {
-                Toast.makeText(context, context.getString(R.string.email_already_taken), Toast.LENGTH_SHORT).show()
-            } else if (isSuccessful == true) {
-                saveUserIdToShared(userId)
-                navigateToProfile()
+    uiEffect.collectWithLifecycle { effect ->
+        when (effect) {
+            is UiEffect.SaveUserIdToShared -> saveUserIdToShared(effect.userId)
+            is UiEffect.NavigateToProfile -> navigateToProfile()
+            is UiEffect.NavigateToSignIn -> navigateToSignIn()
+            is UiEffect.ShowToast -> {
+                Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
             }
         }
     }
-
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
 
     Box(
         modifier = Modifier
@@ -127,8 +122,8 @@ fun SignUpScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
+                    value = uiState.email,
+                    onValueChange = { uiAction(UiAction.EmailChanged(it)) },
                     label = { Text(text = stringResource(id = R.string.email)) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -144,8 +139,8 @@ fun SignUpScreen(
                 )
 
                 OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
+                    value = uiState.password,
+                    onValueChange = { uiAction(UiAction.PasswordChanged(it)) },
                     label = { Text(text = stringResource(id = R.string.password)) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -162,9 +157,9 @@ fun SignUpScreen(
                 )
 
                 Button(
-                    onClick = { viewModel.signUp(email, password) },
+                    onClick = { uiAction(UiAction.SignUpClicked) },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = email.isNotBlank() && password.isNotBlank(),
+                    enabled = uiState.email.isNotBlank() && uiState.password.isNotBlank(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = Color.White
