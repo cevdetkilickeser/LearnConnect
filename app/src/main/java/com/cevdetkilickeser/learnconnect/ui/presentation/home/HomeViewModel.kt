@@ -2,53 +2,52 @@ package com.cevdetkilickeser.learnconnect.ui.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cevdetkilickeser.learnconnect.data.entity.course.Course
 import com.cevdetkilickeser.learnconnect.domain.repository.CourseRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(private val courseRepository: CourseRepositoryImpl) :
     ViewModel() {
 
-    private val _categoryList = MutableStateFlow<List<String>>(emptyList())
-    val categoryList: StateFlow<List<String>> = _categoryList
-
-    private val _courseList = MutableStateFlow<List<Course>>(emptyList())
-    val courseList: StateFlow<List<Course>> = _courseList
+    private val _homeState = MutableStateFlow(HomeState())
+    val homeState = _homeState.asStateFlow()
 
     init {
         getCategories()
-        getFilteredCourses(null)
+        getFilteredCoursesByCategory(null)
     }
 
     private fun getCategories() {
         viewModelScope.launch {
-            val categoryList = withContext(Dispatchers.IO) {
-                courseRepository.getCategories()
+            val categoryList = courseRepository.getCategories()
+            _homeState.update {
+                it.copy(categoryList = categoryList)
             }
-            _categoryList.value = categoryList
         }
     }
 
-    fun getFilteredCourses(category: String?) {
+    fun getFilteredCoursesByCategory(category: String?) {
         viewModelScope.launch {
             courseRepository.getCourses()
-            val filteredCourseList = courseRepository.getFilteredCourses(category)
-            _courseList.value = filteredCourseList!!
+            val filteredCourseList = courseRepository.getFilteredCoursesByCategory(category)
+            _homeState.update {
+                it.copy(courseList = filteredCourseList!!, query = "", selectedCategory = category)
+            }
         }
     }
 
-    fun getSearchResults(query:String?){
+    fun getSearchResults(query: String) {
         viewModelScope.launch {
             courseRepository.getCourses()
             val searchResults = courseRepository.getSearchResults(query)
-            _courseList.value = searchResults!!
+            _homeState.update {
+                it.copy(query = query, courseList = searchResults!!, selectedCategory = null)
+            }
         }
     }
 }

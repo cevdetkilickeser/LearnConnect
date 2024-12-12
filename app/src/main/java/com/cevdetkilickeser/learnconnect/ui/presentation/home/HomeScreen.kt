@@ -1,7 +1,6 @@
 package com.cevdetkilickeser.learnconnect.ui.presentation.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -26,9 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -37,14 +33,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun HomeScreen(
-    navigateToCourseDetail: (String) -> Unit,
-    viewModel: HomeViewModel = hiltViewModel()
+    navigateToCourseDetail: (String) -> Unit, viewModel: HomeViewModel = hiltViewModel()
 ) {
 
-    val categoryList by viewModel.categoryList.collectAsState()
-    val courseList by viewModel.courseList.collectAsState()
-    var selectedCategory by remember { mutableStateOf<String?>(null) }
-    var query by remember { mutableStateOf("") }
+    val homeState by viewModel.homeState.collectAsState()
 
     Box(
         modifier = Modifier
@@ -52,28 +44,21 @@ fun HomeScreen(
             .background(color = MaterialTheme.colorScheme.primary)
     ) {
         Surface(
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background,
             shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
         ) {
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = { query = it },
+                OutlinedTextField(value = homeState.query,
+                    onValueChange = { viewModel.getSearchResults(it) },
                     label = { Text("Search...") },
                     trailingIcon = {
                         Icon(
                             imageVector = Icons.Filled.Search,
                             contentDescription = "Search",
-                            modifier = Modifier
-                                .clip(shape = CircleShape)
-                                .clickable {
-                                    viewModel.getSearchResults(query)
-                                    selectedCategory = null
-                                }
+                            modifier = Modifier.clip(shape = CircleShape)
                         )
                     },
                     modifier = Modifier
@@ -92,15 +77,13 @@ fun HomeScreen(
                 )
 
                 LazyRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    items(categoryList) { label ->
-                        val isSelected = selectedCategory == label
-                        FilterChip(
-                            selected = isSelected,
+                    items(homeState.categoryList) { label ->
+                        val isSelected = homeState.selectedCategory == label
+                        FilterChip(selected = isSelected,
                             onClick = {
-                                viewModel.getFilteredCourses(if (isSelected) null else label)
+                                viewModel.getFilteredCoursesByCategory(if (isSelected) null else label)
                             },
                             label = { Text(label) },
                             colors = FilterChipDefaults.filterChipColors(
@@ -121,13 +104,10 @@ fun HomeScreen(
                 )
 
                 LazyColumn {
-                    items(courseList) { course ->
-                        CourseItem(
-                            course = course,
-                            navigateToCourseDetail = { courseId ->
-                                navigateToCourseDetail(courseId)
-                            }
-                        )
+                    items(homeState.courseList) { course ->
+                        CourseItem(course = course, navigateToCourseDetail = { courseId ->
+                            navigateToCourseDetail(courseId)
+                        })
                     }
                 }
             }

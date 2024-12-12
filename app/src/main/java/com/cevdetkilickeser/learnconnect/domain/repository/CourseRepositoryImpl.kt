@@ -27,7 +27,7 @@ class CourseRepositoryImpl @Inject constructor(private val courseDao: CourseDao)
         return courseList!!
     }
 
-    override fun getFilteredCourses(category: String?): List<Course>? {
+    override fun getFilteredCoursesByCategory(category: String?): List<Course>? {
         return category?.let {
             courseList?.filter { it.category == category } ?: emptyList()
         } ?: courseList

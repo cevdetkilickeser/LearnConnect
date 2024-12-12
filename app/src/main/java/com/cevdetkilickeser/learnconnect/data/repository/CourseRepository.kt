@@ -11,7 +11,7 @@ interface CourseRepository {
 
     suspend fun getCourses(): List<Course>
 
-    fun getFilteredCourses(category: String?): List<Course>?
+    fun getFilteredCoursesByCategory(category: String?): List<Course>?
 
     fun getSearchResults(query: String?): List<Course>?
 
