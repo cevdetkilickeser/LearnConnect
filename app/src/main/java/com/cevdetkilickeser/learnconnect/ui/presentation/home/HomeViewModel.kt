@@ -52,13 +52,13 @@ class HomeViewModel @Inject constructor(private val courseRepository: CourseRepo
     fun onAction(uiAction: UiAction) {
         when (uiAction) {
             is UiAction.QueryChanged -> {
-                updateHomeState {
+                updateUiState {
                     val searchResults = courseRepository.getSearchResults(uiAction.query)
                     copy(query = uiAction.query, courseList = searchResults!!, selectedCategory = null)
                 }
             }
             is UiAction.CategorySelected -> {
-                updateHomeState {
+                updateUiState {
                     val filteredCourseList =
                         courseRepository.getFilteredCoursesByCategory(uiAction.selectedCategory)
                     copy(
@@ -70,17 +70,17 @@ class HomeViewModel @Inject constructor(private val courseRepository: CourseRepo
             }
             is UiAction.CourseClicked -> {
                 viewModelScope.launch {
-                    emitHomeEffect(UiEffect.NavigateToCourseDetail(uiAction.courseId))
+                    emitUiEffect(UiEffect.NavigateToCourseDetail(uiAction.courseId))
                 }
             }
         }
     }
 
-    private fun updateHomeState(block: UiState.() -> UiState) {
+    private fun updateUiState(block: UiState.() -> UiState) {
         _uiState.update(block)
     }
 
-    private suspend fun emitHomeEffect(uiEffect: UiEffect) {
+    private suspend fun emitUiEffect(uiEffect: UiEffect) {
         _uiEffect.send(uiEffect)
     }
 }
