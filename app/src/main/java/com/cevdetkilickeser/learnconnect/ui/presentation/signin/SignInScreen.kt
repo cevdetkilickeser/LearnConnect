@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -43,6 +45,7 @@ import com.cevdetkilickeser.learnconnect.ui.presentation.signin.SignInContract.U
 import com.cevdetkilickeser.learnconnect.ui.presentation.signin.SignInContract.UiEffect
 import com.cevdetkilickeser.learnconnect.ui.presentation.signin.SignInContract.UiState
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
@@ -77,12 +80,14 @@ fun SignInScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.5f)
+                .fillMaxHeight(0.6f)
                 .align(Alignment.TopCenter)
         ) {
             Surface(
                 shape = RoundedCornerShape(32.dp),
-                modifier = Modifier.size(128.dp)
+                modifier = Modifier
+                    .size(128.dp)
+                    .padding()
             ) {
                 GlideImage(
                     model = R.drawable.ic_app_icon,
@@ -113,7 +118,6 @@ fun SignInScreen(
             color = MaterialTheme.colorScheme.background,
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.5f)
                 .align(Alignment.BottomCenter)
         ) {
             Column(
@@ -167,7 +171,9 @@ fun SignInScreen(
                         contentColor = Color.White
                     )
                 ) {
-                    Text(text = stringResource(id = R.string.sign_in))
+                    Text(
+                        text = stringResource(id = R.string.sign_in)
+                    )
                 }
 
                 Text(
@@ -175,11 +181,14 @@ fun SignInScreen(
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                Text(
-                    text = stringResource(id = R.string.sign_up),
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.clickable { navigateToSignUp() }
-                )
+                Surface(color = Color.Unspecified, modifier = Modifier.imePadding()) {
+                    Text(
+                        text = stringResource(id = R.string.sign_up),
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.clickable { uiAction(UiAction.SignUpClicked) }
+                    )
+                }
+
                 Text(
                     text = stringResource(id = R.string.thanks),
                     fontSize = 10.sp
@@ -187,4 +196,17 @@ fun SignInScreen(
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun SignInScreenPreview() {
+    SignInScreen(
+        uiState = UiState(),
+        uiEffect = emptyFlow(),
+        uiAction = {},
+        saveUserIdToShared = {},
+        navigateToHome = {},
+        navigateToSignUp = {}
+    )
 }

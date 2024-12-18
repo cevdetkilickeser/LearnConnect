@@ -10,6 +10,7 @@ object SignInContract {
         data class EmailChanged(val email: String) : UiAction
         data class PasswordChanged(val password: String) : UiAction
         data object SignInClicked : UiAction
+        data object SignUpClicked : UiAction
     }
 
     sealed class UiEffect {

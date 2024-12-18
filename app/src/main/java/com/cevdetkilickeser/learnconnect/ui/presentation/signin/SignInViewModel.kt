@@ -32,6 +32,7 @@ class SignInViewModel @Inject constructor(private val userRepository: UserReposi
             is UiAction.EmailChanged -> updateUiState { copy(email = uiAction.email) }
             is UiAction.PasswordChanged -> updateUiState { copy(password = uiAction.password) }
             is UiAction.SignInClicked -> signIn(_uiState.value.email, _uiState.value.password)
+            is UiAction.SignUpClicked -> viewModelScope.launch { emitUiEffect(UiEffect.NavigateToSignUp) }
         }
     }
 
