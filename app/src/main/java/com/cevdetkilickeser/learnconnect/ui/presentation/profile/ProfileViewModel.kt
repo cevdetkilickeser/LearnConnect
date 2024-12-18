@@ -3,13 +3,17 @@ package com.cevdetkilickeser.learnconnect.ui.presentation.profile
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cevdetkilickeser.learnconnect.data.entity.User
 import com.cevdetkilickeser.learnconnect.data.repository.UserRepository
+import com.cevdetkilickeser.learnconnect.ui.presentation.profile.ProfileContract.UiAction
+import com.cevdetkilickeser.learnconnect.ui.presentation.profile.ProfileContract.UiEffect
+import com.cevdetkilickeser.learnconnect.ui.presentation.profile.ProfileContract.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -17,45 +21,86 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(private val userRepository: UserRepository) :
     ViewModel() {
 
-    private val _user = MutableStateFlow<User?>(null)
-    val user: StateFlow<User?> = _user
+    private val _uiState = MutableStateFlow(UiState())
+    val uiState = _uiState.asStateFlow()
 
-    private val _uri = MutableStateFlow<Uri?>(null)
-    val uri: StateFlow<Uri?> = _uri
+    private val _uiEffect by lazy { Channel<UiEffect>() }
+    val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
 
-    private val _passwordChanged = MutableSharedFlow<Boolean>()
-    val passwordChanged: SharedFlow<Boolean> = _passwordChanged
+    fun onAction(action: UiAction) {
+        when (action) {
+            is UiAction.ProfileImageSelected -> uploadImage(action.userId, action.uri)
+            is UiAction.NameClicked -> updateUiState { copy(showNameDialog = true) }
+            is UiAction.NameDialogPositiveClicked -> changeName(
+                action.userId, action.name, action.updateTopBarName
+            )
+
+            is UiAction.NameDialogNegativeClicked -> updateUiState { copy(showNameDialog = false) }
+            is UiAction.ChangePasswordClicked -> updateUiState { copy(showChangePasswordDialog = true) }
+            is UiAction.ChangePasswordDialogPositiveClicked -> changePassword(
+                action.userId, action.currentPassword, action.newPassword
+            )
+
+            is UiAction.ChangePasswordDialogNegativeClicked -> updateUiState {
+                copy(
+                    showChangePasswordDialog = false
+                )
+            }
+
+            is UiAction.SignOutClicked -> signOut()
+        }
+    }
 
     fun getUserInfo(userId: Int) {
         viewModelScope.launch {
             val user = userRepository.getUserInfo(userId)
-            val uri = user.image?.let {
-                Uri.parse(user.image)
+            val uri = user.image?.let { Uri.parse(user.image) }
+            updateUiState {
+                copy(user = user, imageUri = uri, showNameDialog = false, showChangePasswordDialog = false)
             }
-            _user.value = user
-            _uri.value = uri
         }
     }
 
-    fun changePassword(userId: Int, currentPassword: String, newPassword: String) {
+    private fun changePassword(userId: Int, currentPassword: String, newPassword: String) {
         viewModelScope.launch {
             val result = userRepository.changePassword(userId, currentPassword, newPassword)
-            _passwordChanged.emit(result > 0)
+            if (result > 0) {
+                emitUiEffect(UiEffect.ShowToast("Password changed"))
+                updateUiState { copy(showChangePasswordDialog = false) }
+            } else {
+                emitUiEffect(UiEffect.ShowToast("Current password is wrong"))
+            }
         }
     }
 
-    fun changeName(userId: Int, name: String, updateTopBarName: () -> Unit) {
+    private fun changeName(userId: Int, name: String, updateTopBarName: () -> Unit) {
         viewModelScope.launch {
             userRepository.changeName(userId, name)
             getUserInfo(userId)
             updateTopBarName()
+            updateUiState { copy(showNameDialog = false) }
         }
     }
 
-    fun uploadImage(userId: Int, uri: Uri?) {
+    private fun uploadImage(userId: Int, uri: Uri?) {
         viewModelScope.launch {
             userRepository.uploadImage(userId, uri)
             getUserInfo(userId)
         }
+    }
+
+    private fun signOut() {
+        viewModelScope.launch {
+            emitUiEffect(UiEffect.RemoveUserIdFromSharedPref)
+            emitUiEffect(UiEffect.NavigateToSignIn)
+        }
+    }
+
+    private fun updateUiState(block: UiState.() -> UiState) {
+        _uiState.update(block)
+    }
+
+    private suspend fun emitUiEffect(uiEffect: UiEffect) {
+        _uiEffect.send(uiEffect)
     }
 }

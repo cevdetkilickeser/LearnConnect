@@ -15,6 +15,7 @@ import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeScreen
 import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeViewModel
 import com.cevdetkilickeser.learnconnect.ui.presentation.mycourses.MyCoursesScreen
 import com.cevdetkilickeser.learnconnect.ui.presentation.profile.ProfileScreen
+import com.cevdetkilickeser.learnconnect.ui.presentation.profile.ProfileViewModel
 import com.cevdetkilickeser.learnconnect.ui.presentation.signin.SignInScreen
 import com.cevdetkilickeser.learnconnect.ui.presentation.signin.SignInViewModel
 import com.cevdetkilickeser.learnconnect.ui.presentation.signup.SignUpScreen
@@ -120,7 +121,13 @@ fun AppNavigation(
             )
         }
         composable(Screen.Profile.route) {
+            val viewModel = hiltViewModel<ProfileViewModel>()
+            val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.uiEffect
             ProfileScreen(
+                uiState = uiState.value,
+                uiEffect = uiEffect,
+                uiAction = viewModel::onAction,
                 isDarkTheme = isDarkTheme,
                 changeAppTheme = changeAppTheme,
                 userId = getUserIdFromSharedPref(),

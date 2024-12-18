@@ -34,11 +34,6 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,13 +47,21 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.cevdetkilickeser.learnconnect.R
+import com.cevdetkilickeser.learnconnect.collectWithLifecycle
+import com.cevdetkilickeser.learnconnect.ui.presentation.profile.ProfileContract.UiAction
+import com.cevdetkilickeser.learnconnect.ui.presentation.profile.ProfileContract.UiEffect
+import com.cevdetkilickeser.learnconnect.ui.presentation.profile.ProfileContract.UiState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import kotlinx.coroutines.flow.Flow
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalGlideComposeApi::class)
 @Composable
 fun ProfileScreen(
+    uiState: UiState,
+    uiEffect: Flow<UiEffect>,
+    uiAction: (UiAction) -> Unit,
     isDarkTheme: Boolean,
     changeAppTheme: () -> Unit,
     userId: Int,
@@ -68,12 +71,15 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
-    val user by viewModel.user.collectAsState()
-    val imageUri by viewModel.uri.collectAsState()
-    var showPasswordDialog by remember { mutableStateOf(false) }
-    var showNameDialog by remember { mutableStateOf(false) }
-    val errorMessage = stringResource(id = R.string.password_changed)
-    val successMessage = stringResource(id = R.string.password_not_changed)
+    uiEffect.collectWithLifecycle { effect ->
+        when (effect) {
+            UiEffect.NavigateToSignIn -> navigateToSignIn()
+            UiEffect.RemoveUserIdFromSharedPref -> removeUserIdFromSharedPref()
+            is UiEffect.ShowToast -> {
+                Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     val galleryPermission = rememberPermissionState(
         if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_IMAGES
@@ -85,7 +91,9 @@ fun ProfileScreen(
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val uri = result.data?.data
-            viewModel.uploadImage(userId, uri)
+            uri?.let {
+                uiAction(UiAction.ProfileImageSelected(userId, uri))
+            }
         }
     }
 
@@ -93,29 +101,26 @@ fun ProfileScreen(
         viewModel.getUserInfo(userId)
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.passwordChanged.collect { result ->
-            val message = if (result) errorMessage else successMessage
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    if (showPasswordDialog) {
+    if (uiState.showChangePasswordDialog) {
         ChangePasswordDialog(
-            onDismiss = { showPasswordDialog = false },
+            onDismiss = { uiAction(UiAction.ChangePasswordDialogNegativeClicked) },
             onConfirm = { currentPassword, newPassword ->
-                viewModel.changePassword(userId, currentPassword, newPassword)
-                showPasswordDialog = false
+                uiAction(
+                    UiAction.ChangePasswordDialogPositiveClicked(
+                        userId,
+                        currentPassword,
+                        newPassword
+                    )
+                )
             }
         )
     }
 
-    if (showNameDialog) {
+    if (uiState.showNameDialog) {
         ChangeNameDialog(
-            onDismiss = { showNameDialog = false },
+            onDismiss = { uiAction(UiAction.NameDialogNegativeClicked) },
             onConfirm = { name ->
-                viewModel.changeName(userId, name, updateTopBarName)
-                showNameDialog = false
+                uiAction(UiAction.NameDialogPositiveClicked(userId, name, updateTopBarName))
             }
         )
     }
@@ -162,7 +167,7 @@ fun ProfileScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         GlideImage(
-                            model = imageUri,
+                            model = uiState.imageUri,
                             contentDescription = null,
                             failure = null,
                             modifier = Modifier.fillMaxSize(),
@@ -171,16 +176,16 @@ fun ProfileScreen(
                     }
                 }
                 Text(
-                    text = user?.email ?: "e-mail",
+                    text = uiState.user?.email ?: "e-mail",
                     color = MaterialTheme.colorScheme.onPrimary,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
                 Text(
-                    text = user?.name ?: "Input Name",
+                    text = uiState.user?.name ?: "Input Name",
                     color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-                    modifier = Modifier.clickable { showNameDialog = true }
+                    modifier = Modifier.clickable { uiAction(UiAction.NameClicked) }
                 )
             }
         }
@@ -208,7 +213,7 @@ fun ProfileScreen(
                         .background(
                             color = MaterialTheme.colorScheme.surface
                         )
-                        .clickable { showPasswordDialog = true }
+                        .clickable { uiAction(UiAction.ChangePasswordClicked) }
                 ) {
                     Text(
                         text = "Change Password",
@@ -252,10 +257,7 @@ fun ProfileScreen(
                     )
                 }
                 Button(
-                    onClick = {
-                        removeUserIdFromSharedPref()
-                        navigateToSignIn()
-                    },
+                    onClick = { uiAction(UiAction.SignOutClicked) },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary
                     ),
