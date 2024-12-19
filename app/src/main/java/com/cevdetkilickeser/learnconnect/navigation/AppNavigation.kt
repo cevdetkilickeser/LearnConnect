@@ -131,13 +131,14 @@ fun AppNavigation(
             val viewModel = hiltViewModel<ProfileViewModel>()
             val uiState = viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
+            val userId = getUserIdFromSharedPref()
+            it.arguments?.putInt("userId", userId)
             ProfileScreen(
                 uiState = uiState.value,
                 uiEffect = uiEffect,
                 uiAction = viewModel::onAction,
                 isDarkTheme = isDarkTheme,
                 changeAppTheme = changeAppTheme,
-                userId = getUserIdFromSharedPref(),
                 removeUserIdFromSharedPref = { removeUserIdFromSharedPref() },
                 navigateToSignIn = {
                     navController.navigate(Screen.SignIn.route) {

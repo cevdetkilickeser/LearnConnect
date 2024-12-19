@@ -33,7 +33,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,7 +42,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.cevdetkilickeser.learnconnect.R
@@ -64,11 +62,9 @@ fun ProfileScreen(
     uiAction: (UiAction) -> Unit,
     isDarkTheme: Boolean,
     changeAppTheme: () -> Unit,
-    userId: Int,
     removeUserIdFromSharedPref: () -> Unit,
     navigateToSignIn: () -> Unit,
-    updateTopBarName: () -> Unit,
-    viewModel: ProfileViewModel = hiltViewModel(),
+    updateTopBarName: () -> Unit
 ) {
     val context = LocalContext.current
     uiEffect.collectWithLifecycle { effect ->
@@ -92,13 +88,9 @@ fun ProfileScreen(
         if (result.resultCode == Activity.RESULT_OK) {
             val uri = result.data?.data
             uri?.let {
-                uiAction(UiAction.ProfileImageSelected(userId, uri))
+                uiAction(UiAction.ProfileImageSelected(uri))
             }
         }
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.getUserInfo(userId)
     }
 
     if (uiState.showChangePasswordDialog) {
@@ -107,7 +99,6 @@ fun ProfileScreen(
             onConfirm = { currentPassword, newPassword ->
                 uiAction(
                     UiAction.ChangePasswordDialogPositiveClicked(
-                        userId,
                         currentPassword,
                         newPassword
                     )
@@ -120,7 +111,7 @@ fun ProfileScreen(
         ChangeNameDialog(
             onDismiss = { uiAction(UiAction.NameDialogNegativeClicked) },
             onConfirm = { name ->
-                uiAction(UiAction.NameDialogPositiveClicked(userId, name, updateTopBarName))
+                uiAction(UiAction.NameDialogPositiveClicked(name, updateTopBarName))
             }
         )
     }

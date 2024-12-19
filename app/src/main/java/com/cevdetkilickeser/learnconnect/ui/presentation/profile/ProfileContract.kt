@@ -12,12 +12,12 @@ object ProfileContract {
     )
 
     sealed interface UiAction {
-        data class ProfileImageSelected(val userId: Int, val uri: Uri) : UiAction
+        data class ProfileImageSelected(val uri: Uri) : UiAction
         data object NameClicked : UiAction
-        data class NameDialogPositiveClicked(val userId: Int, val name: String, val updateTopBarName: () -> Unit) : UiAction
+        data class NameDialogPositiveClicked(val name: String, val updateTopBarName: () -> Unit) : UiAction
         data object NameDialogNegativeClicked : UiAction
         data object ChangePasswordClicked : UiAction
-        data class ChangePasswordDialogPositiveClicked(val userId: Int, val currentPassword: String, val newPassword: String) : UiAction
+        data class ChangePasswordDialogPositiveClicked(val currentPassword: String, val newPassword: String) : UiAction
         data object ChangePasswordDialogNegativeClicked : UiAction
         data object SignOutClicked : UiAction
     }
