@@ -24,10 +24,10 @@ import com.cevdetkilickeser.learnconnect.data.entity.course.Course
 @Composable
 fun CourseItem(
     course: Course,
-    navigateToCourseDetail: (String) -> Unit
+    onClickCourse: (String) -> Unit
 ) {
     Card(
-        onClick = { navigateToCourseDetail(course.courseId.toString()) },
+        onClick = { onClickCourse(course.courseId.toString()) },
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
