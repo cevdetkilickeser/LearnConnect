@@ -27,11 +27,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -40,46 +35,46 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.cevdetkilickeser.learnconnect.R
+import com.cevdetkilickeser.learnconnect.collectWithLifecycle
 import com.cevdetkilickeser.learnconnect.setScreenOrientation
+import com.cevdetkilickeser.learnconnect.ui.presentation.coursedetail.CourseDetailContract.UiAction
+import com.cevdetkilickeser.learnconnect.ui.presentation.coursedetail.CourseDetailContract.UiEffect
+import com.cevdetkilickeser.learnconnect.ui.presentation.coursedetail.CourseDetailContract.UiState
+import kotlinx.coroutines.flow.Flow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CourseDetailScreen(
+    uiState: UiState,
+    uiEffect: Flow<UiEffect>,
+    uiAction: (UiAction) -> Unit,
     courseId: Int,
-    userId: Int,
-    navigateToWatchCourse: (String) -> Unit,
-    viewModel: CourseDetailViewModel = hiltViewModel()
+    navigateToWatchCourse: (String) -> Unit
 ) {
 
     val context = LocalContext.current
-    val course by viewModel.course.collectAsState()
-    val commentList by viewModel.comments.collectAsState()
-    val isEnrolled by viewModel.isEnrolled.collectAsState()
-    var showCommentsSheet by remember { mutableStateOf(false) }
+    uiEffect.collectWithLifecycle { effect ->
+        when (effect) {
+            is UiEffect.NavigateToWatchCourse -> navigateToWatchCourse(effect.courseId)
+        }
+    }
 
     LaunchedEffect(Unit) {
         setScreenOrientation(context, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
     }
 
-    LaunchedEffect(isEnrolled) {
-        viewModel.getCourseById(courseId)
-        viewModel.getCourseById(courseId)
-        viewModel.checkEnrollmentStatus(userId, courseId)
-    }
-
-    if (showCommentsSheet) {
+    if (uiState.showCommentsSheet) {
         ModalBottomSheet(
-            onDismissRequest = { showCommentsSheet = false },
+            onDismissRequest = { uiAction(UiAction.CommentsDismissed) },
             sheetState = rememberModalBottomSheetState(
                 skipPartiallyExpanded = true
             )
         ) {
             CommentSection(
-                commentList = commentList,
+                commentList = uiState.commentList,
                 addComment = { commentText, rating ->
-                    viewModel.addComment(userId, courseId, commentText, rating)
+                    uiAction(UiAction.SendClicked(courseId, commentText, rating))
                 }
             )
         }
@@ -107,7 +102,7 @@ fun CourseDetailScreen(
             Text(
                 modifier = Modifier
                     .padding(16.dp),
-                text = course.courseName,
+                text = uiState.course?.courseName ?: "",
                 fontSize = MaterialTheme.typography.titleLarge.fontSize,
                 fontWeight = FontWeight.Bold
             )
@@ -139,7 +134,7 @@ fun CourseDetailScreen(
                             .verticalScroll(rememberScrollState())
                     ) {
                         Text(
-                            text = course.courseName
+                            text = uiState.course?.courseName ?: ""
                         )
                     }
                 }
@@ -150,7 +145,7 @@ fun CourseDetailScreen(
                     )
 
                     AuthorCart(
-                        name = course.author,
+                        name = uiState.course?.author ?: "",
                         courseCount = "14 courses",
                         studentCount = "100+ student"
                     )
@@ -163,10 +158,10 @@ fun CourseDetailScreen(
                     ) {
                         Button(
                             onClick = {
-                                if (isEnrolled) {
-                                    navigateToWatchCourse(courseId.toString())
+                                if (uiState.isEnrolled) {
+                                    uiAction(UiAction.PlayClicked(courseId))
                                 } else {
-                                    viewModel.enrollToCourse(userId, courseId)
+                                    uiAction(UiAction.EnrollClicked(courseId))
                                 }
                             },
                             modifier = Modifier
@@ -175,7 +170,7 @@ fun CourseDetailScreen(
                                 containerColor = MaterialTheme.colorScheme.primary
                             )
                         ) {
-                            if (isEnrolled) {
+                            if (uiState.isEnrolled) {
                                 Icon(
                                     imageVector = Icons.Default.PlayArrow,
                                     contentDescription = null
@@ -187,7 +182,7 @@ fun CourseDetailScreen(
 
                         Button(
                             onClick = {
-                                showCommentsSheet = true
+                                uiAction(UiAction.CommentsClicked)
                             },
                             modifier = Modifier
                                 .weight(1f),

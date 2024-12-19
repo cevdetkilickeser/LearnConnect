@@ -1,16 +1,24 @@
 package com.cevdetkilickeser.learnconnect.ui.presentation.coursedetail
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cevdetkilickeser.learnconnect.data.entity.course.Comment
-import com.cevdetkilickeser.learnconnect.data.entity.course.Course
 import com.cevdetkilickeser.learnconnect.data.entity.course.Enrollment
 import com.cevdetkilickeser.learnconnect.domain.repository.CourseRepositoryImpl
 import com.cevdetkilickeser.learnconnect.domain.repository.EnrollmentRepositoryImpl
 import com.cevdetkilickeser.learnconnect.domain.repository.UserRepositoryImpl
+import com.cevdetkilickeser.learnconnect.ui.presentation.coursedetail.CourseDetailContract.UiAction
+import com.cevdetkilickeser.learnconnect.ui.presentation.coursedetail.CourseDetailContract.UiEffect
+import com.cevdetkilickeser.learnconnect.ui.presentation.coursedetail.CourseDetailContract.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -21,51 +29,73 @@ import javax.inject.Inject
 class CourseDetailViewModel @Inject constructor(
     private val userRepository: UserRepositoryImpl,
     private val courseRepository: CourseRepositoryImpl,
-    private val enrollmentRepository: EnrollmentRepositoryImpl
+    private val enrollmentRepository: EnrollmentRepositoryImpl,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _course = MutableStateFlow(Course(0, "", "", ""))
-    val course: StateFlow<Course> = _course
+    private val _uiState = MutableStateFlow(UiState())
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
-    private val _comments = MutableStateFlow<List<Comment>>(emptyList())
-    val comments: StateFlow<List<Comment>> = _comments
+    private val _uiEffect by lazy { Channel<UiEffect>() }
+    val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
 
-    private val _isEnrolled = MutableStateFlow(false)
-    val isEnrolled: StateFlow<Boolean> = _isEnrolled
+    init {
+        val args = savedStateHandle.get<Int>("userId")
+        args?.let {
+            updateUiState { copy(userId = it) }
+            getCourseById(it)
+        }
+    }
 
-    fun getCourseById(courseId: Int) {
+    fun onAction(uiAction: UiAction) {
+        val userId = uiState.value.userId ?: 0
+        when (uiAction) {
+            is UiAction.EnrollClicked -> enrollToCourse(userId, uiAction.courseId)
+            is UiAction.PlayClicked -> viewModelScope.launch {
+                emitUiEffect(
+                    UiEffect.NavigateToWatchCourse(
+                        uiAction.courseId.toString()
+                    )
+                )
+            }
+
+            UiAction.CommentsClicked -> updateUiState { copy(showCommentsSheet = true) }
+            UiAction.CommentsDismissed -> updateUiState { copy(showCommentsSheet = false) }
+            is UiAction.SendClicked -> addComment(
+                userId,
+                uiAction.courseId,
+                uiAction.commentText,
+                uiAction.rating
+            )
+        }
+    }
+
+    private fun getCourseById(courseId: Int) {
         viewModelScope.launch {
             val course = courseRepository.getCourseById(courseId)
-            _course.value = course
+            updateUiState { copy(course = course) }
             getComments(courseId)
         }
     }
 
     private suspend fun getComments(courseId: Int) {
-        val comments = courseRepository.getComments(courseId)
-        _comments.value = comments
+        val commentList = courseRepository.getComments(courseId)
+        updateUiState { copy(commentList = commentList) }
     }
 
-    fun checkEnrollmentStatus(userId: Int, courseId: Int) {
-        viewModelScope.launch {
-            val isEnrolled = enrollmentRepository.checkEnrollmentStatus(userId, courseId)
-            _isEnrolled.value = isEnrolled
-        }
-
-    }
-
-    fun enrollToCourse(userId: Int, courseId: Int) {
+    private fun enrollToCourse(userId: Int, courseId: Int) {
         viewModelScope.launch {
             val enrollment = Enrollment(0, userId, courseId)
-            _isEnrolled.value = enrollmentRepository.enrollToCourse(enrollment)
+            val result = enrollmentRepository.enrollToCourse(enrollment)
+            updateUiState { copy(isEnrolled = result) }
         }
     }
 
-    fun addComment(userId: Int, courseId: Int, comment: String, rate: Int) {
+    private fun addComment(userId: Int, courseId: Int, commentText: String, rating: Int) {
         viewModelScope.launch {
             val user = userRepository.getUserInfo(userId)
             val date = getCurrentDateTime()
-            val commentObject = Comment(0, courseId, user, date, comment, rate)
+            val commentObject = Comment(0, courseId, user, date, commentText, rating)
             courseRepository.addComment(commentObject)
             getComments(courseId)
         }
@@ -75,5 +105,13 @@ class CourseDetailViewModel @Inject constructor(
         val dateFormat = SimpleDateFormat("dd/MM/yyyy, HH:mm", Locale.getDefault())
         val currentDate = Date()
         return dateFormat.format(currentDate)
+    }
+
+    private fun updateUiState(block: UiState.() -> UiState) {
+        _uiState.update(block)
+    }
+
+    private suspend fun emitUiEffect(uiEffect: UiEffect) {
+        _uiEffect.send(uiEffect)
     }
 }

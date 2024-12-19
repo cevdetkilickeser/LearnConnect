@@ -11,6 +11,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.cevdetkilickeser.learnconnect.ui.presentation.coursedetail.CourseDetailScreen
+import com.cevdetkilickeser.learnconnect.ui.presentation.coursedetail.CourseDetailViewModel
 import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeScreen
 import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeViewModel
 import com.cevdetkilickeser.learnconnect.ui.presentation.mycourses.MyCoursesScreen
@@ -151,11 +152,17 @@ fun AppNavigation(
             )
         }
         composable(Screen.CourseDetail.route) { backStackEntry ->
+            val viewModel = hiltViewModel<CourseDetailViewModel>()
+            val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.uiEffect
             val courseId = backStackEntry.arguments?.getString("courseId") ?: "0"
             val userId = getUserIdFromSharedPref()
+            backStackEntry.arguments?.putInt("userId", userId)
             CourseDetailScreen(
+                uiState = uiState.value,
+                uiEffect = uiEffect,
+                uiAction = viewModel::onAction,
                 courseId = courseId.toInt(),
-                userId = userId,
                 navigateToWatchCourse = {
                     navController.navigate(Screen.WatchCourse.withArgs(courseId))
                 }
