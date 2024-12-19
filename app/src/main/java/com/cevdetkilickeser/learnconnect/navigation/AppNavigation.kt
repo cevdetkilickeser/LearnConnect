@@ -118,11 +118,12 @@ fun AppNavigation(
             val viewModel = hiltViewModel<MyCoursesViewModel>()
             val uiState = viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
+            val userId = getUserIdFromSharedPref()
+            it.arguments?.putInt("userId", userId)
             MyCoursesScreen(
                 uiState = uiState.value,
                 uiEffect = uiEffect,
                 uiAction = viewModel::onAction,
-                userId = getUserIdFromSharedPref(),
                 navigateToWatchCourse = { courseId ->
                     navController.navigate(Screen.WatchCourse.withArgs(courseId.toString()))
                 }

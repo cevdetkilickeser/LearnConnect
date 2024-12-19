@@ -1,5 +1,6 @@
 package com.cevdetkilickeser.learnconnect.ui.presentation.mycourses
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cevdetkilickeser.learnconnect.domain.repository.CourseRepositoryImpl
@@ -19,7 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MyCoursesViewModel @Inject constructor(
-    private val courseRepository: CourseRepositoryImpl
+    private val courseRepository: CourseRepositoryImpl,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
@@ -27,6 +29,11 @@ class MyCoursesViewModel @Inject constructor(
 
     private val _uiEffect by lazy { Channel<UiEffect>() }
     val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
+
+    init {
+        val args = savedStateHandle.get<Int>("userId")
+        args?.let { getEnrolledCourses(it) }
+    }
 
     fun onAction(uiAction: UiAction) {
         when (uiAction) {
@@ -42,7 +49,7 @@ class MyCoursesViewModel @Inject constructor(
         }
     }
 
-    fun getEnrolledCourses(userId: Int) {
+    private fun getEnrolledCourses(userId: Int) {
         viewModelScope.launch {
             val inProgressCourses = courseRepository.getEnrolledCoursesInProgress(userId)
             val doneCourses = courseRepository.getEnrolledCoursesDone(userId)

@@ -40,9 +40,7 @@ fun MyCoursesScreen(
     uiState: UiState,
     uiEffect: Flow<UiEffect>,
     uiAction: (UiAction) -> Unit,
-    userId: Int,
-    navigateToWatchCourse: (Int) -> Unit,
-    viewModel: MyCoursesViewModel = hiltViewModel()
+    navigateToWatchCourse: (Int) -> Unit
 ) {
 
     val context = LocalContext.current
@@ -54,10 +52,6 @@ fun MyCoursesScreen(
 
     LaunchedEffect(Unit) {
         setScreenOrientation(context, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-    }
-
-    LaunchedEffect(userId) {
-        viewModel.getEnrolledCourses(userId)
     }
 
     Box(
@@ -105,7 +99,7 @@ fun MyCoursesScreen(
                         items(uiState.inProgressCourses) { course ->
                             CourseItem(
                                 course = course,
-                                onClickCourse = { navigateToWatchCourse(course.courseId) }
+                                onClickCourse = { uiAction(UiAction.CourseClicked(course.courseId)) }
                             )
                         }
                     }
@@ -114,7 +108,7 @@ fun MyCoursesScreen(
                         items(uiState.doneCourses) { course ->
                             CourseItem(
                                 course = course,
-                                onClickCourse = { navigateToWatchCourse(course.courseId) }
+                                onClickCourse = { uiAction(UiAction.CourseClicked(course.courseId)) }
                             )
                         }
                     }
