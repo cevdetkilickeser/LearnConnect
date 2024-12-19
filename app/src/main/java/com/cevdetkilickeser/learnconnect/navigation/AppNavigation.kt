@@ -14,6 +14,7 @@ import com.cevdetkilickeser.learnconnect.ui.presentation.coursedetail.CourseDeta
 import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeScreen
 import com.cevdetkilickeser.learnconnect.ui.presentation.home.HomeViewModel
 import com.cevdetkilickeser.learnconnect.ui.presentation.mycourses.MyCoursesScreen
+import com.cevdetkilickeser.learnconnect.ui.presentation.mycourses.MyCoursesViewModel
 import com.cevdetkilickeser.learnconnect.ui.presentation.profile.ProfileScreen
 import com.cevdetkilickeser.learnconnect.ui.presentation.profile.ProfileViewModel
 import com.cevdetkilickeser.learnconnect.ui.presentation.signin.SignInScreen
@@ -113,7 +114,13 @@ fun AppNavigation(
             )
         }
         composable(Screen.MyCourses.route) {
+            val viewModel = hiltViewModel<MyCoursesViewModel>()
+            val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.uiEffect
             MyCoursesScreen(
+                uiState = uiState.value,
+                uiEffect = uiEffect,
+                uiAction = viewModel::onAction,
                 userId = getUserIdFromSharedPref(),
                 navigateToWatchCourse = { courseId ->
                     navController.navigate(Screen.WatchCourse.withArgs(courseId.toString()))

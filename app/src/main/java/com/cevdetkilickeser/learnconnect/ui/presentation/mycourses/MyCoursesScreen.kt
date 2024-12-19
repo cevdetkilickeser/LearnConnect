@@ -21,31 +21,36 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cevdetkilickeser.learnconnect.R
+import com.cevdetkilickeser.learnconnect.collectWithLifecycle
 import com.cevdetkilickeser.learnconnect.setScreenOrientation
 import com.cevdetkilickeser.learnconnect.ui.presentation.home.CourseItem
+import com.cevdetkilickeser.learnconnect.ui.presentation.mycourses.MyCoursesContract.UiState
+import com.cevdetkilickeser.learnconnect.ui.presentation.mycourses.MyCoursesContract.UiEffect
+import com.cevdetkilickeser.learnconnect.ui.presentation.mycourses.MyCoursesContract.UiAction
+import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun MyCoursesScreen(
+    uiState: UiState,
+    uiEffect: Flow<UiEffect>,
+    uiAction: (UiAction) -> Unit,
     userId: Int,
     navigateToWatchCourse: (Int) -> Unit,
     viewModel: MyCoursesViewModel = hiltViewModel()
 ) {
 
     val context = LocalContext.current
-    val inProgressCourses by viewModel.inProgressCourses.collectAsState()
-    val doneCourses by viewModel.doneCourses.collectAsState()
-    val selectedTabIndex = remember { mutableIntStateOf(CourseStatus.IN_PROGRESS.ordinal) }
-
+    uiEffect.collectWithLifecycle { effect ->
+        when (effect) {
+            is UiEffect.NavigateToWatchCourse -> navigateToWatchCourse(effect.courseId)
+        }
+    }
 
     LaunchedEffect(Unit) {
         setScreenOrientation(context, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
@@ -72,44 +77,44 @@ fun MyCoursesScreen(
                     .padding(32.dp)
             ) {
                 TabRow(
-                    selectedTabIndex = selectedTabIndex.intValue,
+                    selectedTabIndex = uiState.selectedTabIndex,
                     modifier = Modifier.fillMaxWidth(),
                     containerColor = MaterialTheme.colorScheme.background,
                     contentColor = MaterialTheme.colorScheme.onBackground,
                     indicator = { tabPositions ->
                         SecondaryIndicator(
-                            modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex.intValue]),
+                            modifier = Modifier.tabIndicatorOffset(tabPositions[uiState.selectedTabIndex]),
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
                 ) {
                     Tab(
-                        selected = selectedTabIndex.intValue == CourseStatus.IN_PROGRESS.ordinal,
-                        onClick = { selectedTabIndex.intValue = CourseStatus.IN_PROGRESS.ordinal },
+                        selected = uiState.selectedTabIndex == CourseStatus.IN_PROGRESS.ordinal,
+                        onClick = { uiAction(UiAction.TabSelected(CourseStatus.IN_PROGRESS.ordinal)) },
                         text = { Text(text = stringResource(id = R.string.inProgress)) }
                     )
                     Tab(
-                        selected = selectedTabIndex.intValue == CourseStatus.DONE.ordinal,
-                        onClick = { selectedTabIndex.intValue = CourseStatus.DONE.ordinal },
+                        selected = uiState.selectedTabIndex == CourseStatus.DONE.ordinal,
+                        onClick = { uiAction(UiAction.TabSelected(CourseStatus.DONE.ordinal)) },
                         text = { Text(text = stringResource(id = R.string.done)) }
                     )
                 }
                 Spacer(modifier = Modifier.height(32.dp))
-                when (selectedTabIndex.intValue) {
+                when (uiState.selectedTabIndex) {
                     CourseStatus.IN_PROGRESS.ordinal -> LazyColumn {
-                        items(inProgressCourses) { course ->
+                        items(uiState.inProgressCourses) { course ->
                             CourseItem(
                                 course = course,
-                                navigateToCourseDetail = { navigateToWatchCourse(course.courseId) }
+                                onClickCourse = { navigateToWatchCourse(course.courseId) }
                             )
                         }
                     }
 
                     CourseStatus.DONE.ordinal -> LazyColumn {
-                        items(doneCourses) { course ->
+                        items(uiState.doneCourses) { course ->
                             CourseItem(
                                 course = course,
-                                navigateToCourseDetail = { navigateToWatchCourse(course.courseId) }
+                                onClickCourse = { navigateToWatchCourse(course.courseId) }
                             )
                         }
                     }
