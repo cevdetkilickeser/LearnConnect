@@ -121,7 +121,7 @@ fun HomeScreen(
                     items(uiState.courseList) { course ->
                         CourseItem(
                             course = course,
-                            navigateToCourseDetail = { courseId ->
+                            onClickCourse = { courseId ->
                                 uiAction(UiAction.CourseClicked(courseId))
                             }
                         )
