@@ -49,6 +49,7 @@ fun CourseDetailScreen(
     uiState: UiState,
     uiEffect: Flow<UiEffect>,
     uiAction: (UiAction) -> Unit,
+    userId: Int,
     courseId: Int,
     navigateToWatchCourse: (String) -> Unit
 ) {
@@ -62,6 +63,7 @@ fun CourseDetailScreen(
 
     LaunchedEffect(Unit) {
         setScreenOrientation(context, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+        uiAction(UiAction.GetCourseById(userId, courseId))
     }
 
     if (uiState.showCommentsSheet) {

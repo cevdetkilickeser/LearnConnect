@@ -25,14 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.cevdetkilickeser.learnconnect.R
 import com.cevdetkilickeser.learnconnect.collectWithLifecycle
 import com.cevdetkilickeser.learnconnect.setScreenOrientation
 import com.cevdetkilickeser.learnconnect.ui.presentation.home.CourseItem
-import com.cevdetkilickeser.learnconnect.ui.presentation.mycourses.MyCoursesContract.UiState
-import com.cevdetkilickeser.learnconnect.ui.presentation.mycourses.MyCoursesContract.UiEffect
 import com.cevdetkilickeser.learnconnect.ui.presentation.mycourses.MyCoursesContract.UiAction
+import com.cevdetkilickeser.learnconnect.ui.presentation.mycourses.MyCoursesContract.UiEffect
+import com.cevdetkilickeser.learnconnect.ui.presentation.mycourses.MyCoursesContract.UiState
 import kotlinx.coroutines.flow.Flow
 
 @Composable
@@ -40,6 +39,7 @@ fun MyCoursesScreen(
     uiState: UiState,
     uiEffect: Flow<UiEffect>,
     uiAction: (UiAction) -> Unit,
+    userId: Int,
     navigateToWatchCourse: (Int) -> Unit
 ) {
 
@@ -52,6 +52,7 @@ fun MyCoursesScreen(
 
     LaunchedEffect(Unit) {
         setScreenOrientation(context, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+        uiAction(UiAction.GetEnrolledCourses(userId))
     }
 
     Box(

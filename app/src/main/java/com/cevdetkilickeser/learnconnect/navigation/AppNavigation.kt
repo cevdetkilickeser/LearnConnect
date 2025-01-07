@@ -119,11 +119,11 @@ fun AppNavigation(
             val uiState = viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
             val userId = getUserIdFromSharedPref()
-            it.arguments?.putInt("userId", userId)
             MyCoursesScreen(
                 uiState = uiState.value,
                 uiEffect = uiEffect,
                 uiAction = viewModel::onAction,
+                userId = userId,
                 navigateToWatchCourse = { courseId ->
                     navController.navigate(Screen.WatchCourse.withArgs(courseId.toString()))
                 }
@@ -134,11 +134,11 @@ fun AppNavigation(
             val uiState = viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
             val userId = getUserIdFromSharedPref()
-            it.arguments?.putInt("userId", userId)
             ProfileScreen(
                 uiState = uiState.value,
                 uiEffect = uiEffect,
                 uiAction = viewModel::onAction,
+                userId = userId,
                 isDarkTheme = isDarkTheme,
                 changeAppTheme = changeAppTheme,
                 removeUserIdFromSharedPref = { removeUserIdFromSharedPref() },
@@ -163,6 +163,7 @@ fun AppNavigation(
                 uiState = uiState.value,
                 uiEffect = uiEffect,
                 uiAction = viewModel::onAction,
+                userId = userId,
                 courseId = courseId.toInt(),
                 navigateToWatchCourse = {
                     navController.navigate(Screen.WatchCourse.withArgs(courseId))

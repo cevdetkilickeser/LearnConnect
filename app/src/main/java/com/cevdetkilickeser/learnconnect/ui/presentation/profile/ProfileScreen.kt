@@ -3,6 +3,7 @@ package com.cevdetkilickeser.learnconnect.ui.presentation.profile
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -33,6 +34,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,6 +48,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.cevdetkilickeser.learnconnect.R
 import com.cevdetkilickeser.learnconnect.collectWithLifecycle
+import com.cevdetkilickeser.learnconnect.setScreenOrientation
 import com.cevdetkilickeser.learnconnect.ui.presentation.profile.ProfileContract.UiAction
 import com.cevdetkilickeser.learnconnect.ui.presentation.profile.ProfileContract.UiEffect
 import com.cevdetkilickeser.learnconnect.ui.presentation.profile.ProfileContract.UiState
@@ -60,6 +63,7 @@ fun ProfileScreen(
     uiState: UiState,
     uiEffect: Flow<UiEffect>,
     uiAction: (UiAction) -> Unit,
+    userId: Int,
     isDarkTheme: Boolean,
     changeAppTheme: () -> Unit,
     removeUserIdFromSharedPref: () -> Unit,
@@ -75,6 +79,11 @@ fun ProfileScreen(
                 Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    LaunchedEffect(Unit) {
+        setScreenOrientation(context, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+        uiAction(UiAction.GetProfile(userId))
     }
 
     val galleryPermission = rememberPermissionState(

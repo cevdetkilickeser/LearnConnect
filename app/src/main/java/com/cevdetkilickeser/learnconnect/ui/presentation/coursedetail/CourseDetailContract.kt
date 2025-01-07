@@ -13,6 +13,7 @@ object CourseDetailContract {
     )
 
     sealed interface UiAction {
+        data class GetCourseById(val userId: Int, val courseId: Int) : UiAction
         data class EnrollClicked(val courseId: Int) : UiAction
         data class PlayClicked(val courseId: Int) : UiAction
         data object CommentsClicked : UiAction

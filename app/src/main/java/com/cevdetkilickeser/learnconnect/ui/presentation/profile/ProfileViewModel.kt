@@ -1,7 +1,6 @@
 package com.cevdetkilickeser.learnconnect.ui.presentation.profile
 
 import android.net.Uri
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cevdetkilickeser.learnconnect.data.repository.UserRepository
@@ -20,8 +19,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val userRepository: UserRepository,
-    savedStateHandle: SavedStateHandle
+    private val userRepository: UserRepository
 ) :
     ViewModel() {
 
@@ -31,14 +29,10 @@ class ProfileViewModel @Inject constructor(
     private val _uiEffect by lazy { Channel<UiEffect>() }
     val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
 
-    init {
-        val args = savedStateHandle.get<Int>("userId")
-        args?.let { getUserInfo(it) }
-    }
-
     fun onAction(action: UiAction) {
         val userId = uiState.value.user?.userId ?: 0
         when (action) {
+            is UiAction.GetProfile -> getUserInfo(action.userId)
             is UiAction.ProfileImageSelected -> uploadImage(action.uri)
             is UiAction.NameClicked -> updateUiState { copy(showNameDialog = true) }
             is UiAction.NameDialogPositiveClicked -> changeName(
@@ -65,14 +59,7 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             val user = userRepository.getUserInfo(userId)
             val uri = user.image?.let { Uri.parse(user.image) }
-            updateUiState {
-                copy(
-                    user = user,
-                    imageUri = uri,
-                    showNameDialog = false,
-                    showChangePasswordDialog = false
-                )
-            }
+            updateUiState { copy(user = user, imageUri = uri) }
         }
     }
 

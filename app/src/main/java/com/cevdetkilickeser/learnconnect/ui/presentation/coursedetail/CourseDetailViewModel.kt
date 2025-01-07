@@ -1,6 +1,5 @@
 package com.cevdetkilickeser.learnconnect.ui.presentation.coursedetail
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cevdetkilickeser.learnconnect.data.entity.course.Comment
@@ -29,8 +28,7 @@ import javax.inject.Inject
 class CourseDetailViewModel @Inject constructor(
     private val userRepository: UserRepositoryImpl,
     private val courseRepository: CourseRepositoryImpl,
-    private val enrollmentRepository: EnrollmentRepositoryImpl,
-    savedStateHandle: SavedStateHandle
+    private val enrollmentRepository: EnrollmentRepositoryImpl
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
@@ -39,17 +37,10 @@ class CourseDetailViewModel @Inject constructor(
     private val _uiEffect by lazy { Channel<UiEffect>() }
     val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
 
-    init {
-        val args = savedStateHandle.get<Int>("userId")
-        args?.let {
-            updateUiState { copy(userId = it) }
-            getCourseById(it)
-        }
-    }
-
     fun onAction(uiAction: UiAction) {
         val userId = uiState.value.userId ?: 0
         when (uiAction) {
+            is UiAction.GetCourseById -> getCourseById(uiAction.userId, uiAction.courseId)
             is UiAction.EnrollClicked -> enrollToCourse(userId, uiAction.courseId)
             is UiAction.PlayClicked -> viewModelScope.launch {
                 emitUiEffect(
@@ -70,10 +61,11 @@ class CourseDetailViewModel @Inject constructor(
         }
     }
 
-    private fun getCourseById(courseId: Int) {
+    private fun getCourseById(userId: Int, courseId: Int) {
         viewModelScope.launch {
             val course = courseRepository.getCourseById(courseId)
-            updateUiState { copy(course = course) }
+            val isEnrolled = enrollmentRepository.checkEnrollmentStatus(userId, courseId)
+            updateUiState { copy(userId = userId, course = course, isEnrolled = isEnrolled) }
             getComments(courseId)
         }
     }

@@ -10,6 +10,7 @@ object MyCoursesContract {
     )
 
     sealed interface UiAction {
+        data class GetEnrolledCourses(val userId: Int) : UiAction
         data class TabSelected(val selectedTabIndex: Int) : UiAction
         data class CourseClicked(val courseId: Int) : UiAction
     }

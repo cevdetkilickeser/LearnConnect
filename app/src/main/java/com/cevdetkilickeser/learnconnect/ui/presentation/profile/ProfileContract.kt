@@ -12,6 +12,7 @@ object ProfileContract {
     )
 
     sealed interface UiAction {
+        data class GetProfile(val userId: Int) : UiAction
         data class ProfileImageSelected(val uri: Uri) : UiAction
         data object NameClicked : UiAction
         data class NameDialogPositiveClicked(val name: String, val updateTopBarName: () -> Unit) : UiAction

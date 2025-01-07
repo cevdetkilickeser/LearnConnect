@@ -19,10 +19,10 @@ import androidx.room.PrimaryKey
 )
 data class Lesson(
     @PrimaryKey(autoGenerate = true) val lessonId: Int,
-    val courseId: Int,
     val lessonNumber: Int,
     val lessonTitle: String,
     val lessonDuration: Int,
     val lessonUrl: String,
-    val filePath: String?
+    val filePath: String?,
+    val courseId: Int,
 )
